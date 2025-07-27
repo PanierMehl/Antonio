@@ -5,7 +5,7 @@ import nextcord
 from nextcord import Embed, Interaction, SlashOption, Locale
 from nextcord.ext import commands
 
-from modules.admin.view import giveaway_selecetes_roles_de, giveaway_selecetes_roles_en, giveaway_create_de, giveaway_create_en
+from modules.admin.view import giveaway_selected_roles_de, giveaway_selected_roles_en, giveaway_create_de, giveaway_create_en, giveaway_selected_user_de, giveaway_selected_user_en
 import config
 import perms_check
 from mysql_class import BotDB
@@ -63,8 +63,8 @@ class Admin(commands.Cog, name="Administrator"):
     async def giveaway(self, inter: Interaction):
         pass
  
-    
-    @giveaway.subcommand(name="create", description="Create a giveaway",
+    '''
+        @giveaway.subcommand(name="create", description="Create a giveaway",
                          name_localizations={Locale.de: "erstellen", Locale.en_US: "create"},
                          description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})  
     async def giveaway_create(self, inter: Interaction,
@@ -88,22 +88,39 @@ class Admin(commands.Cog, name="Administrator"):
         
         elif entiled == "roles":
             if inter.locale == "de":
-                await inter.response.send_message(view=giveaway_selecetes_roles_de(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_roles_de(channel), ephemeral=True)
             elif inter.locale == "en_US":
-                await inter.response.send_message(view=giveaway_selecetes_roles_en(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_roles_en(channel), ephemeral=True)
             else:
-                await inter.response.send_message(view=giveaway_selecetes_roles_en(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_roles_en(channel), ephemeral=True)
         
         elif entiled == "user":
             if inter.locale == "de":
-                await inter.response.send_message(view=giveaway_selecetes_roles_de(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_user_de(channel), ephemeral=True)
         
             elif inter.locale == "en_US":
-                await inter.response.send_message(view=giveaway_selecetes_roles_en(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_user_en(channel), ephemeral=True)
             
             else:
-                await inter.response.send_message(view=giveaway_selecetes_roles_en(channel), ephemeral=True)
+                await inter.response.send_message(view=giveaway_selected_user_en(channel), ephemeral=True)
     
+        '''
+    @giveaway.subcommand(name="create", description="Create a giveaway",
+                         name_localizations={Locale.de: "erstellen", Locale.en_US: "create"},
+                         description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})  
+    async def giveaway_create(self, inter: Interaction,
+                              channel: nextcord.abc.GuildChannel = SlashOption(channel_types=[nextcord.ChannelType.text], description="What channel should the giveaway be in?", required=True,
+                                                                               name_localizations={Locale.de: "kanal", Locale.en_US: "channel"},
+                                                                               description_localizations={Locale.de:"In welchen Kanal soll die Gewinnspiel statt finden?", Locale.en_US: "What channel should the giveaway be in?"}))
+        if inter.locale == "de":
+            await inter.response.send_modal(modal=giveaway_create_de(self.channel, None))
+        elif inter.locale == "en_US":
+            await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
+        else:
+            await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
+    
+    
+
         
     @giveaway.subcommand(name="reroll", description="Reroll a Giveaway with the giveaway id",
                          name_localizations={Locale.de: "neuauslosung", Locale.en_US: "reroll"},

@@ -240,14 +240,15 @@ class join_giveawy_de(nc.ui.View):
             
             
 
-class giveaway_selecetes_roles_en(nc.ui.View):
+class giveaway_selected_roles_en(nc.ui.View):
     def __init__(self, channel):
+        super().__init__()
         self.channel = channel
         
     
     @nc.ui.role_select(placeholder="Please choose a role", max_values=1)
     async def on_select(self, select: nc.ui.RoleSelect, inter: nc.Interaction):
-        roles = select.values.roles
+        roles = select.values
         for role in roles:
             pass
         
@@ -262,8 +263,9 @@ class giveaway_selecetes_roles_en(nc.ui.View):
           
           
             
-class giveaway_selecetes_roles_de(nc.ui.View):
+class giveaway_selected_roles_de(nc.ui.View):
     def __init__(self, channel):
+        super().__init__()
         self.channel = channel
         
     
@@ -284,7 +286,7 @@ class giveaway_selecetes_roles_de(nc.ui.View):
     
     
             
-class giveaway_selecetes_user_de(nc.ui.View):
+class giveaway_selected_user_de(nc.ui.View):
     def __init__(self, channel):
         self.channel = channel
         
@@ -304,7 +306,7 @@ class giveaway_selecetes_user_de(nc.ui.View):
             
             
             
-class giveaway_selecetes_user_en(nc.ui.View):
+class giveaway_selected_user_en(nc.ui.View):
     def __init__(self, channel):
         self.channel = channel
         
