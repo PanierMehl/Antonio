@@ -1,0 +1,487 @@
+import json
+import os
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import random
+
+from mysql_class import BotDB, StartUpDB
+import cooldowns
+import nextcord
+import pytz
+import inspect
+from cooldowns import CallableOnCooldown
+from dotenv import load_dotenv
+from nextcord import (ApplicationCheckFailure, ApplicationError,
+                      ApplicationInvokeError, NotFound, Embed, Interaction, )
+from nextcord.ext import commands, tasks
+
+import aiosqlite
+import asyncio 
+import config
+import traceback
+from rich.markdown import Markdown
+from rich.console import Console
+from rich.table import Table
+#from discord.ext.ipc import Server, ClientPayload
+from modules.ticket_system.view import TicketMain_One_V2, TicketMain_Two_V2, TicketMain_Three_V2
+from modules.admin.view import join_giveawy_en
+
+import yaml
+
+cwd = Path(__file__).parents[0]
+cwd = str(cwd)
+    
+
+    
+def main():
+    bot = commands.Bot(intents=nextcord.Intents.all(), help_command=None, case_insensitive=True)
+    ##
+
+    load_dotenv()
+    
+    bot.config_token = os.getenv("BOT_TOKEN")
+
+    bot.cwd = cwd
+    #ipc = Server(bot=bot, secret_key="lol")
+    
+    StartUpDB()
+##################################################################################################################################################################  
+    
+    # load all cogs
+    for folder in os.listdir(os.getcwd() + "/modules"):
+        if os.path.exists(os.path.join(os.getcwd() + "/modules", folder, "cog.py")):
+            bot.load_extension(f"modules.{folder}.cog")
+            
+    # load detections
+    for folder in os.listdir(os.getcwd() + "/cogs"):
+        if os.path.exists(os.path.join(os.getcwd() + "/cogs", folder, "ghost_ping.py")):
+            bot.load_extension(f"cogs.{folder}.ghost_ping")
+    
+
+    
+##################################################################################################################################################################
+    """        
+    @Server.route()
+    async def guild_count(self, _):
+        return str(len(self.guilds))
+    
+
+    @Server.route()
+    async def bot_guilds(self, _):
+        guild_ids = [str(guild.id) for guild in self.guilds]
+        return {"data": guild_ids}
+
+
+    @Server.route()
+    async def guild_stats(self, data: ClientPayload):
+        guild = self.get_guild(data.guild_id)
+        if not guild:
+            return {
+                "member_count": "Unbekannt",
+                "name": "Unbekannt"
+            }
+        
+        return {
+            "member_count": guild.member_count,
+            "name": guild.name,
+        }
+
+
+    async def on_ipc_error(self, endpoint: str, exc: Exception) -> None:
+        raise exc  """
+    #########################################################################
+    persistent_view_added = False
+
+    @bot.listen('on_ready')
+    async def on_ready():
+        nonlocal persistent_view_added
+        if not persistent_view_added:
+            for guild in bot.guilds:
+                
+                ts_query = BotDB().query_ticket_system(guild.id)
+                if ts_query is not None:
+                    if ts_query[1] == "1":
+                        bot.add_view(TicketMain_One_V2(ts_query[5], ts_query[0], ts_query[8]))
+                    if ts_query[1] == "2":
+                        bot.add_view(TicketMain_Two_V2(ts_query[5], ts_query[6], ts_query[0], ts_query[8], ts_query[9]))
+                    if ts_query[1] == "3":
+                        bot.add_view(TicketMain_Three_V2(ts_query[5], ts_query[6], ts_query[7], ts_query[0], ts_query[8], ts_query[9], ts_query[10]))
+
+                buttons_query = BotDB().query_buttons(guild.id)
+                if buttons_query is not None:
+                    bot.add_view(join_giveawy_en(buttons_query[0], buttons_query[1], buttons_query[2]))
+                    
+                    
+            persistent_view_added = True
+
+        console = Console()
+        #await ipc.start()
+        #Markdown
+        startup = f"""# {bot.user.name}#{bot.user.discriminator} is starting up"""
+        w_b = Markdown(startup)
+        console.print(w_b)
+
+        #Table
+        command_table = Table(leading=1 , header_style="cyan2", border_style="white")
+        command_table.add_column("Time", style="magenta",  width=30)
+        command_table.add_column("Command", style="dark_green",  width=30, justify="center")
+        command_table.add_column("Status", style="blue3", justify="right")
+        command_table.add_column("IS Global?", style="blue3", justify="right", width=15)
+        
+        for cmd in bot.get_all_application_commands():
+            command_table.add_row(f"{str(datetime.now())[:16]}", f"{cmd.name}", "Loaded", f"[green]YES[/]" if cmd.is_global else "[red]NO[/]")
+            if cmd.children:                
+                
+                for sub in cmd.children:
+                    command_table.add_row(f"{str(datetime.now())[:16]}", f"{sub}", "Loaded", f"Subcommand of {cmd.name}")
+            else:
+                pass
+        console.print(command_table)
+
+        #Loop Start
+        check_giveaway_ending.start()
+        change_presence.start()
+         
+    #########################################################################
+    
+    @bot.listen('on_guild_join')
+    async def on_guild_join(guild):
+        
+        file = nextcord.File("GIFS/AddingBot.gif", filename="AddingBot.gif")
+        
+        information_embed = nextcord.Embed(title=f"Thanks for adding {config.BOT_NAME} {config.dc_bots} to your Server",
+                                           description="I Hope you enjoy the Bot")
+        information_embed.add_field(name="BOT Infos",
+                                    value=f"The Bot is currently at V2.0\n"
+                                    f"{config.VERSION}\n"
+                                    f"Made by: PanierMehl")
+        information_embed.add_field(name="Current Features:", value=
+                                    "Information Commands\n"
+                                    "Moderation Command\n"
+                                    "Level 1 and Level 2 command acees roles\n"
+                                    "Ticket System\n")
+        
+        information_embed.add_field(name="Planed Features:",
+                                    value=f"Custom Voice (only one per server)\n"
+                                    "Audith Log\n"
+                                    "Warn Commands")
+        information_embed.set_image(url="attachment://AddingBot.gif")
+        
+        channel = guild.system_channel or guild.text_channels[0]
+        await channel.send(file=file, embed=information_embed)
+        
+    #########################################################################
+    
+    @bot.listen('on_application_command_error')
+    async def on_application_command_error(interaction: nextcord.Interaction, error):
+        error = getattr(error, "original", error)
+        
+        if isinstance(error, ApplicationCheckFailure):
+            pass
+        elif isinstance(error, ApplicationInvokeError):
+            raise error
+        elif isinstance(error, ApplicationError):
+            raise error 
+        elif isinstance(error, NotFound):
+            pass
+        elif isinstance(error, CallableOnCooldown):
+            if error.cooldown.bucket == cooldowns.SlashBucket.guild:
+                pass
+            else:
+                cooldown = nextcord.Embed(description=f"{config.a_cross} This Command is on cooldown. Retry in `{error.retry_after}` seconds.", colour=config.red)
+                await interaction.response.send_message(embed=cooldown)
+        
+        else:
+            error_section = interaction.client.get_channel(1084273834305265737)
+            
+            tb = traceback.format_exception(type(error), error, error.__traceback__)
+            error_msg = '```' + ''.join(tb) + '```'
+            error_details = f"{inspect.getframeinfo(inspect.currentframe()).filename}, {inspect.currentframe().f_lineno} - {error}"
+            
+            error_embed = nextcord.Embed(title=f"Error from {interaction.guild.name}",
+                                    description=str(error_msg)[:1024], colour=config.red)
+            error_embed.add_field(name="Error Details", value=str(error_details)[:1024])
+
+            error_name = str(error)[:100]
+        
+            thread = await error_section.create_thread(name=error_name, embed=error_embed)
+            await thread.send(content=f"<@&903363204200140831>")
+            try:
+                await interaction.response.send_message(content="Wow!  You have discovered an error, how does it work?  Anyway... your error has been forwarded to us and we will fix it as quickly as possible.  Thank you for your cooperation and understanding.", ephemeral=True)
+
+                raise error
+            except: 
+                raise error
+
+
+
+######################################################################################################
+    @bot.listen('on_message')
+    async def on_message(message: nextcord.Message):
+        if message.author == bot.user:
+            return
+        
+        #https://docs.nextcord.dev/en/stable/faq.html#why-does-on-message-make-my-commands-stop-working
+        #bot.process_commands(message)
+         
+        """         
+        word_count = len(message.content.split())
+        message_length = len(message.content) 
+        multiplier = 0.7
+        if word_count < 4:
+            if message_length != 0:
+                total_message_xp = (word_count * multiplier) / message_length
+            else:
+                total_message_xp = 0
+        elif 4 <= word_count <= 15:
+            total_message_xp = (message_length * multiplier) / word_count
+        elif 15 <= word_count <= 25:
+            total_message_xp = (message_length * multiplier) / 3.75
+        elif word_count > 26:
+            total_message_xp = (message_length * multiplier) / (word_count / 2)
+            
+
+        guild = message.guild.id
+        user = message.author.id
+        
+        level_thresholds = [20, 50, 75, 100, 150, 250, 400, 650, 800, 1000]
+        
+        current_datetime = datetime.now()
+        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        stats = BotDB().level_user_query(user, guild)
+        
+        if stats is None:
+            BotDB().level_insert_new_user(user, guild)
+            return
+                    
+        old_xp_count = float(stats[0] or 0)
+        old_level = float(stats[1] or 0)
+        
+        if stats[2] is not None:
+            last_entry = stats[2]
+            time_difference = current_datetime - last_entry
+                                        
+            if time_difference >= timedelta(seconds=30):
+                new_xp_count = total_message_xp + old_xp_count
+                rounded_xp_count = round(new_xp_count, 2)
+                new_lvl = sum(1 for threshold in level_thresholds if new_xp_count >= threshold) + 1
+                
+                if old_level != new_lvl:
+                    await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}")
+                BotDB().level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
+                return
+            else:
+                pass
+                
+        else:
+            new_xp_count = total_message_xp + old_xp_count
+            rounded_xp_count = round(new_xp_count, 2)
+            
+            new_lvl = sum(1 for threshold in level_thresholds if new_xp_count >= threshold) + 1
+            
+            if old_level < new_lvl:
+                await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}")
+            BotDB().level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
+            return
+                        
+                
+        """
+            
+        # G L O B A L - C H A T
+    
+        _check_global_exists = BotDB().query_server_table(message.guild.id)
+                                    
+        channel = message.channel
+        if _check_global_exists is None:
+            return
+        
+        if _check_global_exists is not None:
+            _get_all_global_ids = BotDB().query_all_global_channels()
+            
+            
+            if channel.id == _check_global_exists[4]:
+                
+                inv = await message.channel.create_invite(unique=False)
+                link_bot_invite = '[Invite Bot](https://discord.com/api/oauth2/authorize?client_id=1026298999369650216&permissions=8&scope=bot%20applications.commands)'
+                link_server = f'[Go to Server]({inv})'
+                
+                for channel_id in map(lambda data: data[0], _get_all_global_ids):
+                    if channel_id == None:
+                        continue
+                    else:
+                        try:
+                            c = bot.get_channel(int(channel_id))
+                            if c:
+                                guild: nextcord.Guild = bot.get_guild(c.guild.id)
+                                perms: nextcord.Permissions = c.permissions_for(guild.get_member(bot.user.id))
+                                if perms.send_messages and perms.attach_files and perms.embed_links and perms.external_emojis:
+                                    de = pytz.timezone('Europe/Berlin')
+                                    ge = nextcord.Embed(description=f"{message.content}\n\n{link_bot_invite} ║ {link_server}", timestamp=datetime.now().astimezone(tz=de), color=message.author.color)
+                                    ge.set_footer(text=message.guild.name, icon_url=message.guild.icon)
+                                    ge.set_author(name=message.author, icon_url=message.author.display_avatar.url)
+
+                                    await c.send(embed=ge)
+                                else:
+                                    continue
+                                
+                        except nextcord.Forbidden:
+                            continue
+                        except nextcord.HTTPException:
+                            continue
+                                            
+                await message.delete()
+                return
+        
+            else:
+                return
+                
+                
+            
+            
+    @bot.event
+    async def on_guild_channel_delete(channel: nextcord.abc.GuildChannel):
+        check = BotDB().query_ticket_informations(channel.id)
+        if check is not None:
+            BotDB().delete_ticket(channel.id, channel.guild.id)
+            return True
+        else:
+            pass     
+    
+    
+    @tasks.loop(seconds=10)
+    async def change_presence():
+        statuses = [
+            nextcord.Activity(type=nextcord.ActivityType.competing, name="to beat other Bots"),
+            nextcord.Activity(type=nextcord.ActivityType.listening, name="Antonio's Radio"),
+            nextcord.Activity(type=nextcord.ActivityType.watching, name="your Server"),
+            nextcord.Activity(type=nextcord.ActivityType.watching, name="on my best creater: @garniermehl"),
+            nextcord.Activity(type=nextcord.ActivityType.playing, name=f"Version {config.VERSION}")
+        ]
+
+        # Wähle zufällig einen Status aus der Liste aus
+        new_status = random.choice(statuses)
+        await bot.change_presence(activity=new_status)
+
+
+    @tasks.loop(seconds=0.2)
+    async def check_giveaway_ending():
+        current_time = datetime.now(timezone.utc)  # Zeit mit Zeitzoneninfo
+        giveaways = BotDB().get_giveaway_ending()
+        for giveaway in giveaways:
+            if giveaway is None:
+                continue
+            
+            giveaway_end_time = datetime.fromtimestamp(giveaway[0], tz=timezone.utc)
+            message_id = giveaway[1]
+            guild_id = giveaway[2]
+            giveaway_id = giveaway[4]
+            channel_id = giveaway[3]
+            prize = giveaway[5]
+            participants_data = giveaway[6]
+            finished = giveaway[7]
+            
+            time_since_end = current_time - giveaway_end_time
+            if time_since_end >= timedelta(hours=12):
+                BotDB().remove_giveaway(giveaway_end_time, guild_id)
+                
+            elif timedelta(seconds=1) <= time_since_end <= timedelta(seconds=749):
+                
+                if finished == 1:
+                    continue
+                else:
+                    winners_tuple = BotDB().determine_winners(giveaway_id)
+                    winners_str = winners_tuple[0]
+                    num_winners = winners_tuple[1]
+                    BotDB().mark_giveaway_as_finished(giveaway_id, True)
+                    
+                    guild = bot.get_guild(guild_id)
+                    if guild:
+                        channel = guild.get_channel(channel_id)
+                        if channel:
+                            try:
+                                message = await channel.fetch_message(message_id)
+                                
+                                if winners_str is None:
+                                    embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
+                                    embed.add_field(name="Winners", value="No Winners\n\uFEFF")
+                                    embed.add_field(name="Prize:", value=f"{prize}\n\uFEFF")
+                                    embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
+                                    await message.edit(embed=embed, view=None)
+                                    return
+                            
+                                
+                                participants_str = participants_data
+
+                                if participants_str is None:
+                                        participants = []
+                                else:
+                                    try:
+                                        participants = json.loads(participants_str)
+                                    except json.JSONDecodeError:
+                                        participants = []
+                                            
+                                            
+                                winners_list = winners_str.strip("[]").split(", ")
+                                selected_winners = random.sample(winners_list, min(num_winners, len(winners_list)))
+
+
+                                winner_mentions = ', '.join(f"<@{winner_id.strip()}>" for winner_id in selected_winners)
+                                l = BotDB().query_server_table(guild_id)
+                                if l[5] == "Engish":
+                                    embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
+                                    embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
+                                    embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
+                                    embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
+                                    embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
+                                    await message.edit(embed=embed, view=None)
+                                    
+                                    await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
+                                    
+                                elif l[5] == "German":
+                                    embed = nextcord.Embed(title="🎉 Gewinnspiel beendet 🎉", description="Das Gewinnspiel ist beendet, eine weitere Teilnahme ist nicht möglich!", colour=config.red)
+                                    embed.add_field(name="Gewinner", value=f"{winner_mentions}\n\uFEFF")
+                                    embed.add_field(name="Preis", value=f"{prize}\n\uFEFF")
+                                    embed.add_field(name="Teilnehmer", value=f"{len(participants)}\n\uFEFF")
+                                    embed.set_footer(text=f"Gewinnspiel ID: {giveaway_id}")
+                                    await message.edit(embed=embed, view=None)
+                                    
+                                    await channel.send(content=f"{winner_mentions} hat das Gewinnspiel `{giveaway_id}` gewonnen. Glückwunsch.")
+                                    
+                                else:
+                                    embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
+                                    embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
+                                    embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
+                                    embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
+                                    embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
+                                    await message.edit(embed=embed, view=None)
+                                    
+                                    await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
+                                
+                            except nextcord.NotFound:
+                                return
+                            except nextcord.Forbidden:
+                                return
+                            except nextcord.HTTPException as e:
+                                return
+                            
+            elif time_since_end > timedelta(seconds=750):
+                continue 
+                
+                
+
+
+
+######################################################################################################
+
+
+                
+    bot.run(bot.config_token)
+
+if __name__ == '__main__':
+    main()
+    
+
+
+
+    

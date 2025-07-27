@@ -1,0 +1,684 @@
+commands:
+
+
+  #Voice Commands
+  voice_join:
+    re_cannot_join:
+      title:
+        de: Beitritt fehlgeschlagen
+        en_US: Failed to join
+      description:
+        de: Du befindest dich derzeit in keinem Sprachkanal. Bitte verbinde dich zuerst mit einem Sprachkanal.
+        en_US: You're not currently on any voice channel. Please connect to a voice channel first.
+
+    re_already_in_voice:
+      title:
+        de: Beitritt fehlgeschlagen
+        en_US: Failed to join
+      description:
+        de: Ich kann deinem Sprachkanal nicht beitreten, weil ich bereits mit anderen Mitgliedern in einem anderen Sprachkanal abhänge.
+        en_US: I can't join your voice channel because I'm already hanging out with other members in another voice channel.
+
+    re_in_your_voice:
+      title:
+        de: Beitritt fehlgeschlagen
+        en_US: Failed to join
+      description:
+        de: Ich kann deinem Sprachkanal nicht beitreten, weil ich bereits in deinem Sprachkanal bin
+        en_US: I can't join your voice channel because I'm already in your voice channel
+    
+    re_connected:
+      title: 
+        de: "{channel} beigetreten {emoji}"
+        en_US: "Joined {channel}  {emoji}"
+      description:
+        de: Ich bin erfolgreich dem Sprachkanal {jump_url} beigetreten
+        en_US: I have successfully joined Voice Channel {jump_url}
+
+  voice_reconnect:
+    re_sucess:
+      title:
+        de: Erfolgreich wiederverbunden {emoji}
+        en_US: Successfully reconnected {emoji}
+      description:
+        de: Ich habe die Verbindung zum Sprachkanal erfolgreich wiederhergestellt
+        en_US: I have successfully reconnected to the voice channel       
+
+    re_not_in_voice:
+      title:
+        de: Du bist nicht in einem Sprachkanal
+        en_US: You're not in a voice channel
+      description:
+        de: Bitte stelle zuerst eine Verbindung zu einem Sprachkanal her
+        en_US: Please connect to a voice channel first       
+  
+    re_wrong_voice:
+      title:
+        de: Ich bin nicht in deinem Sprachkanal
+        en_US: I'm not in your voice channel
+      description:
+        de: Ich befinde mich gerade in einem anderen Sprachkanal, daher kannst du diesen Befehl nicht ausführen
+        en_US: I'm currently in a different voice channel, so you can't execute this command       
+
+  voice_disconnect:
+    re_sucess:
+      title: 
+        de: Sprachkanal verlassen {emoji}
+        en_US: Leave voice channel {emoji}
+      description:
+        de: Ich habe den Sprachkanal erfolgreich verlassen
+        en_US: I successfully left the voice channel
+
+    re_not_in_voice:
+      title:
+        de: Du bist nicht in einem Sprachkanal
+        en_US: You're not in a voice channel
+      description:
+        de: Bitte stelle zuerst eine Verbindung zu einem Sprachkanal her
+        en_US: Please connect to a voice channel first
+
+    re_wrong_voice:
+      title:
+        de: Ich bin nicht auf deinem Sprachkanal
+        en_US: I'm not in your voice channel
+      description:
+        de: Ich befinde mich gerade in einem anderen Sprachkanal, daher können Sie diesen Befehl nicht ausführen
+        en_US: I'm currently in a different voice channel, so you can't execute this command
+
+  voice_tts:
+    e_process:
+      title:
+        de: Text wird vorbereitet {emoji}
+        en_US: Text is being prepared {emoji}
+      description:
+        de: Ich bereite mich darauf vor, `{voice_message}` in der Sprache `{language}` abzuspielen. Einen Moment bitte
+        en_US: I'm getting ready to play `{voice_message}` in language `{language}`. One moment please
+
+    e_done:
+      title:
+        de: Text erfolgreich abgespielt
+        en_US: Text played successfully
+      description:
+        de: Ich habe den Text `{voice_message}` in der Sprache `{language}` erfolgreich reproduziert
+        en_US: I have successfully reproduced the text `{voice_message}` in language `{language}`
+
+    e_fail:
+      title:
+        de: Text konnte nicht abgespielt werden
+        en_US: Text could not be played
+      description:
+        de: Es ist ein Fehler aufgtreten, während ich den Text für dich vorbereitet habe. Ich bitte um Entschuldigung
+        en_US: An error occurred while I was preparing the text for you. Please accept my apologies
+
+  delete_all_invites:
+    progress:
+      title: 
+        de: In Vorbereitung {emoji}
+        en_US: In progress {emoji}
+      description:
+        de: Wenn eine Fehlermeldung erscheint, hast du zu viele offene Einladungen. Der Befehl wurde gestoppt und einige der offenen Einladungen wurden bereits gelöscht. Um die anderen offenen Einladungen zu löschen, musst du den Befehl wiederholen.
+        en_US: If an error appears, you have too many open invites. The command has been stopped and some of the open invites have been deleted so far. To delete the other open invites, you must repeat the command.
+
+    d_loop:
+      title:
+        de: "{invites} Einladungen gelöscht"
+        en_US: Deleted {invites} invites'
+
+  #User Moderation Commands
+  member_kick:
+  
+    wait:
+      description:
+        de: Bitte warte einen Moment. Ich bereite alles vor.
+        en_US: Please wait a moment. I prepare everything.
+    
+    notyourself:
+      description:
+        de: "{emoji} Du kannst dich nicht selbst rauswerfen!"
+        en_US: "{emoji} You can't kick yourself!"
+
+    kickdm:
+      title:
+        de: "{emoji} Du wurdest von {guild} verwiesen!"
+        en_US: "{emoji} You were kicked from {guild}!"
+      description:
+        de: Informationen über deinen Rauswurf
+        en_US: Information about your kick
+      field_a:
+        name:
+          de: Wann wurdest du rausgeworfen?
+          en_US: When were you kicked?
+      field_b:
+        name: 
+          de: Grund
+          en_US: Reason  
+      field_c:
+        name: 
+          de: Du kannst gerne wieder beitreten, aber achte darauf, dass du die Regeln beachtest!
+          en_US: You are welcome to join again, but make sure you follow the rules!
+      field_d:
+        name: 
+          de: Achtung!
+          en_US: Attention!
+        value:
+          de: Dieser Link kann nur **einmal** verwendet werden und verfällt nach **5 Tagen**! 
+          en_US: This link can only be used **once** and expires after **5 days**! 
+      
+    kickctx:
+      title:
+        de: Rauswurf erfolgreich
+        en_US: Kick successful
+      description:
+        de: "{emoji_a} {emoji_b} {member} wurde erfolgreich rausgeworfen"
+        en_US: "{emoji_a} {emoji_b} {member} was successfully kicked"
+
+
+  member_ban:
+
+    notyourself:
+      description:
+        de: "{emoji} Du kannst dich nicht selbst bannen!"
+        en_US: "{emoji} You can't ban yourself!"
+
+    wait:
+      description:
+        de: Bitte warte einen Moment. Ich bereite alles vor.
+        en_US: Please wait a moment. I prepare everything.
+      
+    bandm:
+      title:
+        de: "{emoji} Du wurdest von {guild} gebannt!"
+        en_US: "{emoji} You have been banned on {guild}!"
+      description:
+        de: Informationen über deine Sperre
+        en_US: Information about your ban
+      field_a:
+        name:
+          de: Wann wurdest du verbannt?
+          en_US: When were you banned?
+      field_b:
+        name:
+          de: Grund
+          en_US: Reason
+      
+      banctx_nt:
+        description:
+          de: "{emoji_a} {emoji_b} {member} wurde erfolgreich gebannt\n\nMitglied benachrichtigt: {emoji_c}"
+          en_US: "{emoji_a} {emoji_b} {member} was successfully banned\n\nMember Notified: {emoji_c}"
+      
+      banctx_nf:
+        description:
+          de: "{emoji_a} {emoji_b} {member} wurde erfolgreich gebannt\n\nMitglied benachrichtigt: {emoji_c}"
+          en_US: "{emoji_a} {emoji_b} {member} was successfully banned\n\nMember Notified: {emoji_c}"
+
+
+  member_unban:
+
+    notyourself:
+      description:
+        de: "{emoji} Du kannst dich nicht selbst verbannen!"
+        en_US: "{emoji} You can't ban yourself!"
+
+    unbanctx:
+      description:
+        de: "{emoji_a} {emoji_b} {member} wurde erfolgreich entbannt!"
+        en_US: "{emoji_a} {emoji_b} {member} was successfully unbanned!"
+
+
+  member_timeout:
+
+    notyourself:
+      description:
+        de: "{emoji} Du kannst dich nicht selbst in eine Auszeit versetzen!"
+        en_US: "{emoji} You cannot timeout yourself!"
+      
+    r:
+      title:
+        de: Mitglied bereits im Timeout
+        en_US: Member already in Timeout
+      description:
+        de: Dieses Mitglied befindet sich bereits in einer Auszeit!
+        en_US: This member is already in a timeout!
+    
+    untimeoutdm:
+      title:
+        de: "{emoji} Deine Auszeit wurde bei {guild} aufgehoben"
+        en_US: "{emoji} Your timeout was lifted on {guild}"
+      description:
+      de: Informationen über deine Auszeit
+      en_US: Information about your timeout
+      field_a:
+        name:
+          de: Wann wurde die Auszeit aufgehoben?
+          en_US: When was your timeout lifted?
+    
+    untimeoutctx:
+      description:
+        de: "{emoji_a} Die Auszeit von {emoji_b} {member} wurde erfolgreich aufgehoben"
+        en_US: "{emoji_a} The timeout of {emoji_b} {member} has been successfully lifted"
+      field_a:
+        name:
+          de: DM-Status
+          en_US: DM Status
+        value:
+          de: Dieses Mitglied wurde über die Auszeit über seine privaten Nachricht informiert.
+          en_US: This member was informed about the time-out via his private message.
+      field_b:
+        name:
+          de: DM-Status
+          en_US: DM Status
+        value:
+          de: Das Mitglied konnte nicht über seine Auszeit benachrichtigt werden.
+          en_US: The member could not be notified of its timeout.
+
+  
+  member_mute:
+    
+    case_a:
+      title:
+        de: "Mikrofon stumm! {emoji}"
+        en_US: "Microphone muted! {emoji}"
+      description:
+        de: "Ich habe das Mikrofon von {member} erfolgreich stummgeschaltet. Außerdem wurde ein Eintrag in der Historie hinzugefügt."
+        en_US: "I sucessfully muted {member}'s microphone. An entry was also added to the history."
+    
+    case_b:
+      title:
+        de: "Mikrofon und Headset stumm! {emoji}"
+        en_US: "Microphone and Headset muted! {emoji}"
+      description:
+        de:  "Ich habe das Mikrofon und das Headset von {member} erfolgreich stummgeschaltet. Außerdem wurde ein Eintrag in der Historie hinzugefügt."
+        en_US: "I sucessfully muted {member}'s microphone and headset. An entry was also added to the history."
+
+    err:
+      title:
+        de: "Bereits stummgeschaltet! {emoji}"
+        en_US: "Already muted! {emoji}"
+      description:
+        de: "Das Mitglied {member} ist bereits stummgeschaltet."
+        en_US: "The member {member} is already muted."
+
+
+  history_info:
+
+    i_embed:
+      title:
+        de: "Fälle von {member}"
+        en_US: "Cases from {member}"
+      description:
+        de: Bitte wähle einen Fall aus, um ihn zu bearbeiten!
+        en_US: Please select a case to edit it!
+
+    notfound_embed:
+      title:
+        de: Keine Fälle gefunden
+        en_US: No Cases found
+      description:
+        de: "Ich konnte keine Fälle von {member} finden"
+        en_US: "I couldn't find any strikes for {member}"
+
+
+  history_edit_by_user:
+
+    i_embed:
+      title:
+        de: "Fälle von {member}"
+        en_US: Cases from {member}
+      description:
+        de: Bitte wähle einen Fall aus, um ihn zu bearbeiten
+        en_US: Please select a case to edit it
+
+    notfound_embed:
+      title:
+        de: Keine Fälle gefunden
+        en_US: No Cases found
+      description:
+        de: "Ich konnte keine Fälle von {member} finden."
+        en_US: "I couldn't find any strikes for {member}."
+
+
+  history_delete:
+
+    i_embed:
+      title:
+        de: "Fälle von {member}"
+        en_US: Cases from {member}
+      description:
+        de: Bitte wähle einen Fall aus, um ihn zu löschen!
+        en_US: Please select a case to delete it!
+      
+    notfound_embed:
+      title:
+        de: Keine Fälle gefunden
+        en_US: No Cases found
+      description:
+        de: "Ich konnte keine Fälle von {member} finden."
+        en_US: "I couldn't find any strikes for {member}."
+
+
+  stats:
+
+    info_embed:
+      title:
+        de: Hier sind ein paar Informationen über... mich.
+        en_US: Here are a few Informations about... me.
+      description:
+        de: "Ich bin auf {servercount} Servern und kümmere mich um {membercount}!\nIch habe {channelcount} Kanäle im Auge :eyes: !"
+        en_US: "I'm on {servercount} servers servers and take care of {membercount}!\nI have {channelcount} channels in mind :eyes: !"
+
+
+
+  ping:
+
+    r :
+      title:
+        de: Meine Antwortzeit ist...
+        en_US: My responding time is...
+
+    p:
+      e:
+        de: Hervorragend
+        en_US: Excellent
+      g:
+        de: Gut
+        en_US: Good
+      u:
+        de: Inakzeptabel
+        en_US: Unacceptable
+
+
+  ticket_setup:
+
+    e:
+      title:
+        de: Das Ticket-System ist bereits vorhanden!
+        en_US: Ticket system already in place!
+      description:
+        de: "Du hast bereits ein Ticketsystem auf diesem Server.\nDieses befindet sich in {channel}"
+        en_US: "You already have a ticket system on this server.\nThis is located in {channel}"
+
+  
+  memberinfo:
+
+    activity_s:
+      playing:
+        de: "Spielt: {status}"
+        en_US: "Playing: {status}"
+      streaming:
+        de: "`Streaming` **{status}** {button}"
+        en_US: "`Streaming` **{status}** {button}"
+      custom:
+        de: "{status}"
+        en_US: "{status}"
+      no_activity:
+        de: Keine Aktivität
+        en_US: No activity
+
+    memberinfo:
+      title:
+        de: "{emoji_a} Benutzer-Info für {emoji_b} {member} "
+        en_US: "{emoji_a} User-Info for {emoji_b} {member}"
+      description:
+        de: ""
+        en_US: ""
+      field_a:
+        name:
+          de: __**Allgemein**__
+          en_US: __**General**__
+        value:
+          de: "> **Mitglied:** {member}\n> **ID:** `{member_id}`\n> **Erstellt:** `{created}`\n> **Aktuelle Aktivität:** {activity}\n> **Ist ein Bot:** {emoji}"
+          en_US: "> **Member:** {member}\n> **ID:** `{member_id}`\n> **Created:** `{created}`\n> **Current activity:** {activity}\n> **Is Bot:** {emoji}"
+      field_b:
+        name:
+          de: __**Server**__
+          en_US: __**Server**__
+        value:
+          de: "> **Spitzname:** {nick}\n> **Server beigetreten:** `{joined_at}`\n> **Booster:** {premium_since}"
+          en_US: "> **Nickname:** {nick}\n> **Server joined:** `{joined_at}`\n> **Booster:** {premium_since}"
+      field_c:
+        name:
+          de: __**Allgemein**__
+          en_US: __**General**__
+        value:
+          de: "> Mitglied: `{Mitglied}`\n> ID: `{Mitglied_id}`\n> Erstellt: `{created_at}`\n> Ist Bot: {bot}"
+          en_US: "> Member: `{member}`\n> ID: `{member_id}`\n> Created: `{created_at}`\n> Is Bot: {bot}"
+
+
+
+  setup_start:
+
+    embed_start:
+      title:
+        de: Einrichtung ➟ Start
+        en_US: Setup ➟ Start
+      description:
+        de: Bitte warte einen Moment. Die Einrichtung beginnt sofort...
+        en_US: Please wait a moment. Setup begins immediately...
+
+    embed_wait:
+      title:
+        de: Einrichtung ➟ In Bearbeitung
+        en_US: Setup ➟ In progress
+      description:
+        de: Bitte warte einen Moment. Die Einrichtung wird fortgesetzt...
+        en_US: Please wait a moment. Setup continues...
+      
+    reply_a_role:
+      title:
+        de: Einrichtung ➟ Administrator-Rolle aktivieren
+        en_US: Setup ➟ Activate Administrator Role
+      description:
+        de: "{emoji} Bitte wähle eine Rolle."
+        en_US: "{emoji} Please select a role."
+
+    reply_m_role:
+      title:
+        de: Einrichtung ➟ Moderatorrolle aktivieren
+        en_US: Setup ➟ Activate Moderator Role
+      description:
+        de: "{emoji} Bitte wähle eine Rolle."
+        en_US: "{emoji} Please select a role."
+
+
+    reply_s_role:
+      title:
+        de: Einrichtung ➟ Unterstützer-Rolle aktivieren
+        en_US: Setup ➟ Activate Supporter Role
+      description:
+        de: "{emoji} Bitte wähle eine Rolle."
+        en_US: "{emoji} Please select a role."
+
+    reply_l:
+      title:
+        de: Einstellungen ➟ Sprache
+        en_US: Setup ➟ Language
+      description:
+        de: "{emoji} Bitte wähle eine Sprache."
+        en_US: "{emoji} Please select a language."
+
+    yn_embed:
+      title:
+        de: Einrichtung ➟ Globaler Kanal
+        en_US: Setup ➟ Global Channel 
+      description:
+        de: Möchtest du einen globalen Kanal einstellen?
+        en_US: Do you want to set a global channel?
+
+    reply_g:
+      title:
+        de: Einrichtung ➟ Globalen Kanal aktivieren
+        en_US: Setup ➟ Activate Global Channel
+      description:
+        de: "{emoji} Bitte wähle einen Kanal."
+        en_US: "{emoji} Please select a channel."
+          
+    done: 
+      title:
+        de: Einrichtung ➟ Abgeschlossen
+        en_US: Setup ➟ Completed
+      description:
+        de: Die Einrichtung ist abgeschlossen
+        en_US: The setup is completed
+
+  
+
+  global_chat:
+
+    if_r:
+      title:
+         de: "Einrichtung ➟ {s_object}"
+         en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Ausgewählter {s_object} für diesen Server: {channel}"
+        en_US: "Selected {s_object} for this server: {channel}"
+    
+    else_r:
+      title:
+        de: "Einrichtung ➟ {s_object}"
+        en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Bitte wähle einen {s_object}."
+        en_US: "Please select a {s_object}."
+
+
+
+  administrator_role:
+
+    if_r:
+      title:
+         de: "Einrichtung ➟ {s_object}"
+         en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Ausgewählte {s_object} für diesen Server: {channel}"
+        en_US: "Selected {s_object} for this server: {role}"
+    
+    else_r:
+      title:
+        de: "Einrichtung ➟ {s_object}"
+        en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Bitte wähle eine {s_object}."
+        en_US: "Please select a {s_object}."
+
+
+
+  moderator_role:
+
+    if_r:
+      title:
+         de:  "Einrichtung ➟ {s_object}"
+         en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Ausgewählte {s_object} für diesen Server: {channel}"
+        en_US: "Selected {s_object} for this server: {role}"
+    
+    else_r:
+      title:
+        de: "Einrichtung ➟ {s_object}"
+        en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Bitte wähle eine {s_object}."
+        en_US: "Please select a {s_object}."
+
+
+
+  supporter_role:
+
+    if_r:
+      title:
+         de: "Einrichtung ➟ {s_object}"
+         en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Ausgewählte {s_object} für diesen Server: {channel}"
+        en_US: "Selected {s_object} for this server: {role}"
+    
+    else_r:
+      title:
+        de: "Einrichtung ➟ {s_object}"
+        en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Bitte wähle eine {s_object}."
+        en_US: "Please select a {s_object}."
+
+
+
+  language:
+
+    if_r:
+      title:
+         de: "Einrichtung ➟ {s_object}"
+         en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Ausgewählte {s_object} für diesen Server: {channel}"
+        en_US: "Selected {s_object} for this server: {data_language}"
+    
+    else_r:
+      title:
+        de: "Einrichtung ➟ {s_object}"
+        en_US: "Setup ➟ {s_object}"
+      description:
+        de: "Bitte wähle eine {s_object}."
+        en_US: "Please select a {s_object}."
+
+  clear:
+
+    ays:
+      description:
+        de: "{a_support} Bist du sicher, dass du **{amount} Nachricht(en)** löschen möchtest?"
+        en_US: "{a_support} Are you sure to delete **{amount} message(s)**?"
+    
+    clear_ctx:
+      title:
+        de: Ich habe den Kanal sauber gemacht.
+        en_US: I cleaned up the channel 
+      description:
+        de: "{a_trash} Ich habe `{amount}` Nachrichten gelöscht!"
+        en_US: "{a_trash} I deleted `{amount}` messages!"
+
+    embed:
+      description:
+        de: Es ist in Ordnung. Ich habe den Befehl für dich storniert.
+        en_US: It's okay. I canceled the command for you
+
+
+
+view:
+
+  ticket:
+    wait_msg:
+      de: "Bitte warte {emoji}"
+      en_US: "Please wait {emoji}"
+
+    info:
+      title:
+        de: "{emoji} Ticket {id} | Thema: {label}"
+        en_US: "{emoji} Ticket {id} | Topic: {label}"
+      description:
+        de: "Willkommen im Support {user}. \nBitte kontaktiere kein Teammitglied direkt, jemand wird sich so schnell wie möglich um dein Anliegen kümmern."
+        en_US: "Welcome to support {user}.\nPlease do not ping a team member, someone will take care of your issue as quickly as possible."
+
+    cc:
+      title:
+        de: "{emoji} Ticket {create} erstellt {tic}.\n Klicke hier -> {mention}"
+        en_US: "{emoji} Ticket {create} created {tic}.\n Click here -> {mention}"
+
+    er:
+      title:
+        de: "{emoji} Du hast bereits ein offnes Ticket"
+        en_US: "{emoji} You already have a open ticket"
+      description:
+        de: "Bitte beende das derzeitige [ticket](https://discord.com/channels/{guild}/{fkt})."
+        en_US: "Please end your current [ticket](https://discord.com/channels/{guild}/{fkt})."
+    
+  ts_delete:
+    load:
+      de: "Bitte warte während ich das Ticketsystem aus der Datenbank entferne {emoji}"
+      en_US: "Please wait while I remove the ticket system from the database {emoji}"
+
+    confirm:
+      title:
+        de:
+        en_US: "Ticket System removed {emoji}"
+      description:
+        de:
+        en_US: "I have successfully removed the ticket system and deleted the message."
