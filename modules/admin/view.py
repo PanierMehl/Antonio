@@ -51,14 +51,14 @@ class giveaway_create_en(nc.ui.Modal):
             
         giveaway_embed = Embed(title=f"🎉 {self.prize.value} 🎉", description=f"Ends at <t:{int(epochEnd)}:f> or <t:{int(epochEnd)}:R>", colour=config.green)
         giveaway_embed.add_field(name=f"Winner(s): {self.winners.value}", value="Click the Button to join!\n\uFEFF")
-        giveaway_embed.add_field(name="Eligible to participate:", value=mention_text, inline=False)
+        giveaway_embed.add_field(name="Eligible to participate:", value=f"{mention_text}\n\uFEFF", inline=False)
         giveaway_embed.add_field(name="Entries:", value="0\n\uFEFF", inline=False)
         giveaway_embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
         giveaway_embed.set_author(name=f"{inter.user.name} started a Giveaway")
         giveaway_started = Embed(title=f"🎉 Giveaway started! 🎉", description=f"Giveaway started in {self.channel.mention}")
         
         await inter.response.send_message(embed=giveaway_started, ephemeral=True)
-        view = join_giveawy_en(epochEnd, inter.guild.id, giveaway_id)
+        view = join_giveawy_en(inter.guild.id, giveaway_id)
         msg = await self.channel.send(embed=giveaway_embed, view=view)
         view.message = msg 
 
@@ -66,7 +66,7 @@ class giveaway_create_en(nc.ui.Modal):
         embed_json_string = json.dumps(embed_data) # Convert the dictionary to a JSON string
 
         BotDB().update_giveaway(msg.id, inter.guild.id, giveaway_id)
-        BotDB().insert_button(epochEnd, inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
+        BotDB().insert_button("en", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
     
     
 class giveaway_create_de(nc.ui.Modal):
@@ -104,14 +104,14 @@ class giveaway_create_de(nc.ui.Modal):
             
         giveaway_embed = Embed(title=f"{config.giveaway} {self.prize.value} {config.giveaway}", description=f"Endet am <t:{int(epochEnd)}:f> oder <t:{int(epochEnd)}:R>", colour=config.green)
         giveaway_embed.add_field(name=f"Gewinner: {self.winners.value}", value="Drücke den Button um teilzunehmen!\n\uFEFF")
-        giveaway_embed.add_field(name="Teilnahmebrechtigt:", value=mention_text, inline=False)        
+        giveaway_embed.add_field(name="Teilnahmebrechtigt:", value=f"{mention_text}\n\uFEFF", inline=False)        
         giveaway_embed.add_field(name="Anzahl der Teilnhemer:", value="0\n\uFEFF", inline=False)
         giveaway_embed.set_footer(text=f"Verlosungs-ID: {giveaway_id}")
         giveaway_embed.set_author(name=f"{inter.user.name} hat eine Verlosung gestartet")
         giveaway_started = Embed(title=f"{config.giveaway} Verlosung gestartet! {config.giveaway}", description=f"Verlosung wurde in {self.channel.mention} gestartet")
         
         await inter.response.send_message(embed=giveaway_started, ephemeral=True)
-        view = join_giveawy_de(epochEnd, inter.guild.id, giveaway_id)
+        view = join_giveawy_de(inter.guild.id, giveaway_id)
         msg = await self.channel.send(embed=giveaway_embed, view=view)
         view.message = msg  
         
@@ -119,11 +119,11 @@ class giveaway_create_de(nc.ui.Modal):
         embed_json_string = json.dumps(embed_data) # Convert the dictionary to a JSON string
 
         BotDB().update_giveaway(msg.id, inter.guild.id, giveaway_id)
-        BotDB().insert_button(epochEnd, inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
+        BotDB().insert_button("de", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
        
         
 class join_giveawy_en(nc.ui.View):
-    def __init__(self, time, guild, giveaway_id):
+    def __init__(self, guild, giveaway_id):
         super().__init__(timeout=None)
         self.guild = guild
         self.giveaway_id = giveaway_id
@@ -219,12 +219,12 @@ class join_giveawy_en(nc.ui.View):
             )
 
             new_entries_count = len(participants)
-            current_embed.set_field_at(1, name="Entries:", value=str(new_entries_count), inline=False)
+            current_embed.set_field_at(2, name="Entries:", value=str(new_entries_count), inline=False)
             await self.message.edit(embed=current_embed)
             
             
 class join_giveawy_de(nc.ui.View):
-    def __init__(self, time, guild, giveaway_id):
+    def __init__(self, guild, giveaway_id):
         super().__init__(timeout=None)
         self.guild = guild
         self.giveaway_id = giveaway_id
@@ -319,7 +319,7 @@ class join_giveawy_de(nc.ui.View):
             )
 
             new_entries_count = len(participants)
-            current_embed.set_field_at(1, name="Teilnehmer:", value=str(new_entries_count), inline=False)
+            current_embed.set_field_at(2, name="Teilnehmer:", value=str(new_entries_count), inline=False)
             await self.message.edit(embed=current_embed)
 
 class giveaway_selected_roles_en(nc.ui.View):

@@ -24,7 +24,7 @@ from rich.console import Console
 from rich.table import Table
 #from discord.ext.ipc import Server, ClientPayload
 from modules.ticket_system.view import TicketMain_One_V2, TicketMain_Two_V2, TicketMain_Three_V2
-from modules.admin.view import join_giveawy_en
+from modules.admin.view import join_giveawy_en, join_giveawy_de
 
 import yaml
 
@@ -109,9 +109,13 @@ def main():
 
                 buttons_query = BotDB().query_buttons(guild.id)
                 if buttons_query is not None:
-                    bot.add_view(join_giveawy_en(buttons_query[0], buttons_query[1], buttons_query[2]))
-                    
-                    
+                    for buttons in buttons_query:
+                        if buttons[0] == "en":
+                            bot.add_view(join_giveawy_en(buttons[5], buttons[2]))
+                        if buttons[0] == "de":
+                            bot.add_view(join_giveawy_de(buttons[5], buttons[2]))
+                
+
             persistent_view_added = True
 
         console = Console()
@@ -234,10 +238,16 @@ def main():
         if message.author == bot.user:
             return
         
+        if message.author.bot:
+            return
+        
+        if message.webhook_id is not None:
+            return
+
         #https://docs.nextcord.dev/en/stable/faq.html#why-does-on-message-make-my-commands-stop-working
         #bot.process_commands(message)
          
-        """         
+                 
         word_count = len(message.content.split())
         message_length = len(message.content) 
         multiplier = 0.7
@@ -281,7 +291,7 @@ def main():
                 new_lvl = sum(1 for threshold in level_thresholds if new_xp_count >= threshold) + 1
                 
                 if old_level != new_lvl:
-                    await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}")
+                    await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}", delete_after=10)
                 BotDB().level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
                 return
             else:
@@ -299,7 +309,7 @@ def main():
             return
                         
                 
-        """
+    
             
         # G L O B A L - C H A T
     
@@ -441,7 +451,7 @@ def main():
 
                                 winner_mentions = ', '.join(f"<@{winner_id.strip()}>" for winner_id in selected_winners)
                                 l = BotDB().query_server_table(guild_id)
-                                if l[5] == "Engish":
+                                if l[5] == "English":
                                     embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
                                     embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
                                     embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")

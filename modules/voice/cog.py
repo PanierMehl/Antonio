@@ -19,20 +19,102 @@ class Voice(commands.Cog, name="Voice Commands"):
     
     def __init__(self, bot):
         self.bot = bot
-        
-    with open("trans.yaml", encoding="utf-8") as file:
-        trans = yaml.safe_load(file)      
+        self.radio_stations = {
+            "I Love Radio": "https://play.ilovemusic.de/ilm_iloveradio/",
+            "I Love 2 Dance": "https://play.ilovemusic.de/ilm_ilove2dance/",
+            "2000er + Throwbacks": "https://play.ilovemusic.de/ilm_ilove2000throwbacks/",
+            "2010er + Throwbacks": "https://play.ilovemusic.de/ilm_ilove2010throwbacks/",
+            "Bass by HBZ": "https://play.ilovemusic.de/ilm_ilovebass/",
+            "I Love Biggest Pop Hits": "https://play.ilovemusic.de/ilm_ilovenewpop/",
+            "I Love Chillpop": "https://play.ilovemusic.de/ilm_ilovechillhop/",
+            "I Love Chillout Beats": "https://play.ilovemusic.de/ilm-ichillout_beats/",
+            "I Love Dance 2025": "https://play.ilovemusic.de/ilm_dance-2023-jahrescharts/",
+            "I Love Dance First!": "https://play.ilovemusic.de/ilm-dance_first/",
+            "I Love Dance History": "https://play.ilovemusic.de/ilm_ilovedancehistory/",
+            "I Love Deutschrap Beste": "https://play.ilovemusic.de/ilm_ilovedeutschrapbeste/",
+            "I Love Deutschrap First!": "https://play.ilovemusic.de/ilm_ilovedeutschrapfirst/",
+            "I Love From Mars": "https://play.ilovemusic.de/ilm_iloveradiofrommars/",
+            "I Love Greatest Hits": "https://play.ilovemusic.de/ilm_ilovegreatesthits/",
+            "I Love Hardstyle": "https://play.ilovemusic.de/ilm_ilovehardstyle/",
+            "I Love Hip Hop": "https://play.ilovemusic.de/ilm_ilovehiphop/",
+            "I Love Hip Hop 2025": "https://play.ilovemusic.de/ilm_hiphop-2023-jahrescharts/",
+            "I Love Hip Hop History": "https://play.ilovemusic.de/ilm_ilovehiphophistory/",
+            "I Love Hit Quiz": "https://play.ilovemusic.de/ilm-ihit-quiz/",
+            "I Love Hits 2025": "https://play.ilovemusic.de/ilm_hits-2023-jahrescharts/",
+            "I Love Hits History": "https://play.ilovemusic.de/ilm_ilovehitshistory/",
+            "I Love Mainstage": "https://play.ilovemusic.de/ilm_ilovemainstagemadness/",
+            "I Love Malle": "https://play.ilovemusic.de/ilm_ilovemalle/",
+            "I Love Mashup": "https://play.ilovemusic.de/ilm_ilovemashup/",
+            "I Love Music & Chill": "https://play.ilovemusic.de/ilm_ilovemusicandchill/",
+            "I Love Party Hard": "https://play.ilovemusic.de/ilm_ilovepartyhard/",
+            "I Love Rock Radio": "https://play.ilovemusic.de/ilm_iloveradiorock/",
+            "I Love Sugar Radio": "https://play.ilovemusic.de/ilm_ilovesugarradio/",
+            "I Love The 90s": "https://play.ilovemusic.de/ilm_ilovethe90s/",
+            "I Love The Beach": "https://play.ilovemusic.de/ilm_ilovethebeach/",
+            "I Love The Sun": "https://play.ilovemusic.de/ilm_ilovethesun/",
+            "I Love Tomorrowland": "https://play.ilovemusic.de/ilm-itomorrowland_one_world_radio_germany/",
+            "I Love Top 100 Charts": "https://play.ilovemusic.de/ilm_ilovetop100charts/",
+            "I Love Trash Pop": "https://play.ilovemusic.de/ilm_ilovetrashpop/",
+            "I Love US Rap Radio": "https://play.ilovemusic.de/ilm_iloveusonlyrapradio/",
+            "I Love Workout": "https://play.ilovemusic.de/ilm_iloveworkout/",
+            "I Love XMAS": "https://play.ilovemusic.de/ilm_ilovexmas/",
+            "Radio Bob": "https://streams.radiobob.de/bob-live/mp3-192/streams.radiobob.de/",
+            "1Live": "https://wdr-edge-1043-live.sslcast.addradio.de/wdr/1live/live/mp3/128/stream.mp3",
+            "Antenne Bayern": "https://stream.antenne.de/antenne",
+            "Radio NRW": "https://stream.lokalradio.nrw/stream.mp3",
+            "Deutschlandfunk": "https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3"
+        }
 
+    async def radio_autocomplete(self, inter: Interaction, current: str):
+        """Autocomplete für Radiosender"""
+        choices = [
+                        name
+                        for name in self.radio_stations.keys()
+                        if current.lower() in name.lower()
+                    ][:25]
 
-    @nextcord.slash_command(name="voice",
-                            name_localizations={
-                                Locale.de: "sprachkanal",
-                                Locale.en_US: "voice"
-                            })
-    
+    @nextcord.slash_command(name="voice", description="Voice-Befehle")
     async def voice(self, inter: Interaction):
         pass
 
+    @voice.subcommand(name="radio", description="Spielt ein Radio im Voice-Channel")
+    async def voice_radio(
+        self,
+        inter: Interaction,
+        sender: str = SlashOption(
+            name="sender",
+            description="Wähle den Radiosender",
+            autocomplete=True,
+        ),
+    ):
+        if inter.user.voice is None:
+            await inter.response.send_message("❌ Du bist in keinem Voice-Channel.", ephemeral=True)
+            return
+
+        voice_channel = inter.user.voice.channel
+        voice_client = inter.guild.voice_client
+
+        if voice_client and voice_client.is_connected() and voice_client.channel != voice_channel:
+            await inter.response.send_message("❌ Ich bin bereits in einem anderen Channel.", ephemeral=True)
+            return
+
+        if not voice_client:
+            voice_client = await voice_channel.connect()
+
+        # Stream URL ermitteln
+        stream_url = self.radio_stations.get(sender)
+        if not stream_url:
+            await inter.response.send_message("❌ Ungültiger Radiosender.", ephemeral=True)
+            return
+
+        voice_client.stop()
+        voice_client.play(nextcord.FFmpegPCMAudio(stream_url))
+        await inter.response.send_message(f"▶ **Spiele jetzt:** `{sender}`")
+
+    @voice_radio.on_autocomplete("sender")
+    async def radio_autocomplete_handler(self, inter: Interaction, current: str):
+        choices = await self.radio_autocomplete(inter, current)
+        await inter.response.send_autocomplete(choices)
 
     @voice.subcommand(name="join", description="The bot joins your voice channel",
                       name_localizations={
@@ -336,7 +418,7 @@ class Voice(commands.Cog, name="Voice Commands"):
             await inter.edit_original_message(embed=e_fail, file=cancel_error_png_a)
             
 
-        
+'''        
     @voice.subcommand(name="radio")
     async def voice_radio(self, inter: Interaction):
         
@@ -355,44 +437,47 @@ class Voice(commands.Cog, name="Voice Commands"):
             bot_in_channel = voice_client.channel
             if bot_in_channel == voice_channel:
                 options = [
-                    nextcord.SelectOption(label="2000er + Trowbacks", value="https://streams.ilovemusic.de/iloveradio37.mp3"),
-                    nextcord.SelectOption(label="2010er + Trowbacks", value="https://streams.ilovemusic.de/iloveradio38.mp3"),
-                    nextcord.SelectOption(label="Bass", value="https://streams.ilovemusic.de/iloveradio29.mp3"),
-                    nextcord.SelectOption(label="Chillout Beats", value="https://streams.ilovemusic.de/iloveradio17.mp3"),
-                    nextcord.SelectOption(label="DJs from Mars", value="https://play.ilovemusic.de/ilovedjsfrommars"),
-                    nextcord.SelectOption(label="Dance", value="https://streams.ilovemusic.de/iloveradio2.mp3"),
-                    nextcord.SelectOption(label="Dance  History", value="https://streams.ilovemusic.de/iloveradio26.mp3"),
-                    nextcord.SelectOption(label="Dance 2024", value="https://streams.ilovemusic.de/iloveradio36.mp3"),
-                    nextcord.SelectOption(label="Dace First!", value="https://streams.ilovemusic.de/iloveradio103.mp3"),
-                    nextcord.SelectOption(label="Deutschrap Beste", value="https://streams.ilovemusic.de/iloveradio6.mp3"),
-                    nextcord.SelectOption(label="Deutschrap First", value="https://streams.ilovemusic.de/iloveradio104.mp3"),
-                    nextcord.SelectOption(label="Greatest Hits", value="https://streams.ilovemusic.de/iloveradio16.mp3"),
-                    nextcord.SelectOption(label="Hardstyle", value="https://streams.ilovemusic.de/iloveradio21.mp3"),
-                    nextcord.SelectOption(label="Hip Hop", value="https://streams.ilovemusic.de/iloveradio3.mp3"),
-                    nextcord.SelectOption(label="Hip Hop 2024", value="https://streams.ilovemusic.de/iloveradio35.mp3"),
-                    nextcord.SelectOption(label="Hip Hop History", value="https://streams.ilovemusic.de/iloveradio27.mp3"),
-                    nextcord.SelectOption(label="Hits 2024", value="https://streams.ilovemusic.de/iloveradio109.mp3"),
-                    nextcord.SelectOption(label="Hits History", value="https://streams.ilovemusic.de/iloveradio12.mp3"),
-                    nextcord.SelectOption(label="Mainstage", value="https://streams.ilovemusic.de/iloveradio22.mp3"),
-                    nextcord.SelectOption(label="Malle", value="https://streams.ilovemusic.de/iloveradio25.mp3"),
-                    nextcord.SelectOption(label="Mashup", value="https://streams.ilovemusic.de/iloveradio5.mp3"),
-                    nextcord.SelectOption(label="Mix Radio", value="https://play.ilovemusic.de/ilm_iloveradio/"),
-                    nextcord.SelectOption(label="Music & Chill", value="https://streams.ilovemusic.de/iloveradio10.mp3"),
-                    nextcord.SelectOption(label="Party Hard", value="https://streams.ilovemusic.de/iloveradio14.mp3"),
-                    nextcord.SelectOption(label="Pop Hits", value="https://play.ilovemusic.de/ilovebiggestpophits"),
-                    nextcord.SelectOption(label="Rock Radio", value="https://play.ilovemusic.de/iloverockradio"),
-                    nextcord.SelectOption(label="Sugar Radio", value="https://streams.ilovemusic.de/iloveradio18.mp3"),
-                    nextcord.SelectOption(label="The 90s", value="https://streams.ilovemusic.de/iloveradio24.mp3"),
-                    nextcord.SelectOption(label="The Beach", value="https://streams.ilovemusic.de/iloveradio7.mp3"),
-                    nextcord.SelectOption(label="The Sun", value="https://streams.ilovemusic.de/iloveradio15.mp3"),
-                    nextcord.SelectOption(label="Top 100 Charts", value="https://streams.ilovemusic.de/iloveradio9.mp3"),
-                    nextcord.SelectOption(label="Trashpop", value="https://streams.ilovemusic.de/iloveradio19.mp3"),
-                    nextcord.SelectOption(label="Tylor & Harry", value="https://play.ilovemusic.de/ilovetaylorandharry"),
-                    nextcord.SelectOption(label="Tommorowland", value="https://play.ilovemusic.de/ilm-itomorrowland_one_world_radio_germany/"),
-                    nextcord.SelectOption(label="US only Rap Radio", value="https://streams.ilovemusic.de/iloveradio13.mp3"),
-                    nextcord.SelectOption(label="Workout", value="https://streams.ilovemusic.de/iloveradio23.mp3"),
-                    nextcord.SelectOption(label="XMAs", value="https://streams.ilovemusic.de/iloveradio8.mp3")]
-            
+                    nextcord.SelectOption(label="I Love Radio", value="https://play.ilovemusic.de/ilm_iloveradio/"),
+                    nextcord.SelectOption(label="I Love 2 Dance", value="https://play.ilovemusic.de/ilm_ilove2dance/"),
+                    nextcord.SelectOption(label="2000er + Trowbacks", value="https://play.ilovemusic.de/ilm_ilove2000throwbacks/"),
+                    nextcord.SelectOption(label="2010er + Trowbacks", value="https://play.ilovemusic.de/ilm_ilove2010throwbacks/"),
+                    nextcord.SelectOption(label="Bass by HBZ", value="https://play.ilovemusic.de/ilm_ilovebass/"),
+                    nextcord.SelectOption(label="I Love Biggest Pop Hits", value="https://play.ilovemusic.de/ilm_ilovenewpop/"),
+                    nextcord.SelectOption(label="I Love Chillpop", value="https://play.ilovemusic.de/ilm_ilovechillhop/"),
+                    nextcord.SelectOption(label="I Love Chillout Beats", value="https://play.ilovemusic.de/ilm-ichillout_beats/"),
+                    nextcord.SelectOption(label="I Love Dance 2025", value="https://play.ilovemusic.de/ilm_dance-2023-jahrescharts/"),
+                    nextcord.SelectOption(label="I Love Dance First!", value="https://play.ilovemusic.de/ilm-dance_first/"),
+                    nextcord.SelectOption(label="I Love Dance History", value="https://play.ilovemusic.de/ilm_ilovedancehistory/"),
+                    nextcord.SelectOption(label="I Love Deutschrap Beste", value="https://play.ilovemusic.de/ilm_ilovedeutschrapbeste/"),
+                    nextcord.SelectOption(label="I Love Deutschrap First!", value="https://play.ilovemusic.de/ilm_ilovedeutschrapfirst/"),
+                    nextcord.SelectOption(label="I Love From Mars", value="https://play.ilovemusic.de/ilm_iloveradiofrommars/"),
+                    nextcord.SelectOption(label="I Love Greatest Hits", value="https://play.ilovemusic.de/ilm_ilovegreatesthits/"),
+                    nextcord.SelectOption(label="I Love Hardstyle", value="https://play.ilovemusic.de/ilm_ilovehardstyle/"),
+                    nextcord.SelectOption(label="I Love Hip Hop", value="https://play.ilovemusic.de/ilm_ilovehiphop/"),
+                    nextcord.SelectOption(label="I Love Hip Hop 2025", value="https://play.ilovemusic.de/ilm_hiphop-2023-jahrescharts/"),
+                    nextcord.SelectOption(label="I Love Hip Hop History", value="https://play.ilovemusic.de/ilm_ilovehiphophistory/"),
+                    nextcord.SelectOption(label="I Love Hit Quiz", value="https://play.ilovemusic.de/ilm-ihit-quiz/"),
+                    nextcord.SelectOption(label="I Love Hits 2025", value="https://play.ilovemusic.de/ilm_hits-2023-jahrescharts/"),
+                    nextcord.SelectOption(label="I Love Hits Histroy", value="https://play.ilovemusic.de/ilm_ilovehitshistory/"),
+                    nextcord.SelectOption(label="I Love Mainstage", value="https://play.ilovemusic.de/ilm_ilovemainstagemadness/"),
+                    nextcord.SelectOption(label="I love Malle", value="https://play.ilovemusic.de/ilm_ilovemalle/"),
+                    nextcord.SelectOption(label="I Love Mashup", value="https://play.ilovemusic.de/ilm_ilovemashup/"),
+                    nextcord.SelectOption(label="I Love Music&Chill", value="https://play.ilovemusic.de/ilm_ilovemusicandchill/"),
+                    nextcord.SelectOption(label="I Love Party Hard", value="https://play.ilovemusic.de/ilm_ilovepartyhard/"),
+                    nextcord.SelectOption(label="I Love Rock Radio", value="https://play.ilovemusic.de/ilm_iloveradiorock/"),
+                    nextcord.SelectOption(label="I Love Sugar Radio", value="https://play.ilovemusic.de/ilm_ilovesugarradio/"),
+                    nextcord.SelectOption(label="I Love The 90S", value="https://play.ilovemusic.de/ilm_ilovethe90s/"),
+                    nextcord.SelectOption(label="I Love The Beach", value="https://play.ilovemusic.de/ilm_ilovethebeach/"),
+                    nextcord.SelectOption(label="I Love The Sun", value="https://play.ilovemusic.de/ilm_ilovethesun/"),
+                    nextcord.SelectOption(label="I Love Tomoorowland", value="https://play.ilovemusic.de/ilm-itomorrowland_one_world_radio_germany/"),
+                    nextcord.SelectOption(label="I Love Top 100 Charts", value="https://play.ilovemusic.de/ilm_ilovetop100charts/"),
+                    nextcord.SelectOption(label="I Love Trash Pop", value="https://play.ilovemusic.de/ilm_ilovetrashpop/"),
+                    nextcord.SelectOption(label="I Love US Rap Radio", value="https://play.ilovemusic.de/ilm_iloveusonlyrapradio/"),
+                    nextcord.SelectOption(label="I Love Workout", value="https://play.ilovemusic.de/ilm_iloveworkout/"),
+                    nextcord.SelectOption(label="I Love XMAS", value="https://play.ilovemusic.de/ilm_ilovexmas/")]
+
+                    
+                    
                 await inter.response.send_message(view=RadioDropdown(options, voice_client), ephemeral=True)
                 
             else:
@@ -403,48 +488,48 @@ class Voice(commands.Cog, name="Voice Commands"):
                 await inter.response.send_message(embed=not_same, ephemeral=True, file=cancel_error_png_a)
         else:
             options = [
-                nextcord.SelectOption(label="2000er + Trowbacks", value="https://streams.ilovemusic.de/iloveradio37.mp3"),
-                nextcord.SelectOption(label="2010er + Trowbacks", value="https://streams.ilovemusic.de/iloveradio38.mp3"),
-                nextcord.SelectOption(label="Bass", value="https://streams.ilovemusic.de/iloveradio29.mp3"),
-                nextcord.SelectOption(label="Chillout Beats", value="https://streams.ilovemusic.de/iloveradio17.mp3"),
-                nextcord.SelectOption(label="DJs from Mars", value="https://play.ilovemusic.de/ilovedjsfrommars"),
-                nextcord.SelectOption(label="Dance", value="https://streams.ilovemusic.de/iloveradio2.mp3"),
-                nextcord.SelectOption(label="Dance  History", value="https://streams.ilovemusic.de/iloveradio26.mp3"),
-                nextcord.SelectOption(label="Dance 2024", value="https://streams.ilovemusic.de/iloveradio36.mp3"),
-                nextcord.SelectOption(label="Dace First!", value="https://streams.ilovemusic.de/iloveradio103.mp3"),
-                nextcord.SelectOption(label="Deutschrap Beste", value="https://streams.ilovemusic.de/iloveradio6.mp3"),
-                nextcord.SelectOption(label="Deutschrap First", value="https://streams.ilovemusic.de/iloveradio104.mp3"),
-                nextcord.SelectOption(label="Greatest Hits", value="https://streams.ilovemusic.de/iloveradio16.mp3"),
-                nextcord.SelectOption(label="Hardstyle", value="https://streams.ilovemusic.de/iloveradio21.mp3"),
-                nextcord.SelectOption(label="Hip Hop", value="https://streams.ilovemusic.de/iloveradio3.mp3"),
-                nextcord.SelectOption(label="Hip Hop 2024", value="https://streams.ilovemusic.de/iloveradio35.mp3"),
-                nextcord.SelectOption(label="Hip Hop History", value="https://streams.ilovemusic.de/iloveradio27.mp3"),
-                nextcord.SelectOption(label="Hits 2024", value="https://streams.ilovemusic.de/iloveradio109.mp3"),
-                nextcord.SelectOption(label="Hits History", value="https://streams.ilovemusic.de/iloveradio12.mp3"),
-                nextcord.SelectOption(label="Mainstage", value="https://streams.ilovemusic.de/iloveradio22.mp3"),
-                nextcord.SelectOption(label="Malle", value="https://streams.ilovemusic.de/iloveradio25.mp3"),
-                nextcord.SelectOption(label="Mashup", value="https://streams.ilovemusic.de/iloveradio5.mp3"),
-                nextcord.SelectOption(label="Mix Radio", value="https://play.ilovemusic.de/ilm_iloveradio/"),
-                nextcord.SelectOption(label="Music & Chill", value="https://streams.ilovemusic.de/iloveradio10.mp3"),
-                nextcord.SelectOption(label="Party Hard", value="https://streams.ilovemusic.de/iloveradio14.mp3"),
-                nextcord.SelectOption(label="Pop Hits", value="https://play.ilovemusic.de/ilovebiggestpophits"),
-                nextcord.SelectOption(label="Rock Radio", value="https://play.ilovemusic.de/iloverockradio"),
-                nextcord.SelectOption(label="Sugar Radio", value="https://streams.ilovemusic.de/iloveradio18.mp3"),
-                nextcord.SelectOption(label="The 90s", value="https://streams.ilovemusic.de/iloveradio24.mp3"),
-                nextcord.SelectOption(label="The Beach", value="https://streams.ilovemusic.de/iloveradio7.mp3"),
-                nextcord.SelectOption(label="The Sun", value="https://streams.ilovemusic.de/iloveradio15.mp3"),
-                nextcord.SelectOption(label="Top 100 Charts", value="https://streams.ilovemusic.de/iloveradio9.mp3"),
-                nextcord.SelectOption(label="Trashpop", value="https://streams.ilovemusic.de/iloveradio19.mp3"),
-                nextcord.SelectOption(label="Tylor & Harry", value="https://play.ilovemusic.de/ilovetaylorandharry"),
-                nextcord.SelectOption(label="Tommorowland", value="https://play.ilovemusic.de/ilm-itomorrowland_one_world_radio_germany/"),
-                nextcord.SelectOption(label="US only Rap Radio", value="https://streams.ilovemusic.de/iloveradio13.mp3"),
-                nextcord.SelectOption(label="Workout", value="https://streams.ilovemusic.de/iloveradio23.mp3"),
-                nextcord.SelectOption(label="XMAs", value="https://streams.ilovemusic.de/iloveradio8.mp3")]
-            
+                nextcord.SelectOption(label="I Love Radio", value="https://play.ilovemusic.de/ilm_iloveradio/"),
+                nextcord.SelectOption(label="I Love 2 Dance", value="https://play.ilovemusic.de/ilm_ilove2dance/"),
+                nextcord.SelectOption(label="2000er + Trowbacks", value="https://play.ilovemusic.de/ilm_ilove2000throwbacks/"),
+                nextcord.SelectOption(label="2010er + Trowbacks", value="https://play.ilovemusic.de/ilm_ilove2010throwbacks/"),
+                nextcord.SelectOption(label="Bass by HBZ", value="https://play.ilovemusic.de/ilm_ilovebass/"),
+                nextcord.SelectOption(label="I Love Biggest Pop Hits", value="https://play.ilovemusic.de/ilm_ilovenewpop/"),
+                nextcord.SelectOption(label="I Love Chillpop", value="https://play.ilovemusic.de/ilm_ilovechillhop/"),
+                nextcord.SelectOption(label="I Love Chillout Beats", value="https://play.ilovemusic.de/ilm-ichillout_beats/"),
+                nextcord.SelectOption(label="I Love Dance 2025", value="https://play.ilovemusic.de/ilm_dance-2023-jahrescharts/"),
+                nextcord.SelectOption(label="I Love Dance First!", value="https://play.ilovemusic.de/ilm-dance_first/"),
+                nextcord.SelectOption(label="I Love Dance History", value="https://play.ilovemusic.de/ilm_ilovedancehistory/"),
+                nextcord.SelectOption(label="I Love Deutschrap Beste", value="https://play.ilovemusic.de/ilm_ilovedeutschrapbeste/"),
+                nextcord.SelectOption(label="I Love Deutschrap First!", value="https://play.ilovemusic.de/ilm_ilovedeutschrapfirst/"),
+                nextcord.SelectOption(label="I Love From Mars", value="https://play.ilovemusic.de/ilm_iloveradiofrommars/"),
+                nextcord.SelectOption(label="I Love Greatest Hits", value="https://play.ilovemusic.de/ilm_ilovegreatesthits/"),
+                nextcord.SelectOption(label="I Love Hardstyle", value="https://play.ilovemusic.de/ilm_ilovehardstyle/"),
+                nextcord.SelectOption(label="I Love Hip Hop", value="https://play.ilovemusic.de/ilm_ilovehiphop/"),
+                nextcord.SelectOption(label="I Love Hip Hop 2025", value="https://play.ilovemusic.de/ilm_hiphop-2023-jahrescharts/"),
+                nextcord.SelectOption(label="I Love Hip Hop History", value="https://play.ilovemusic.de/ilm_ilovehiphophistory/"),
+                nextcord.SelectOption(label="I Love Hit Quiz", value="https://play.ilovemusic.de/ilm-ihit-quiz/"),
+                nextcord.SelectOption(label="I Love Hits 2025", value="https://play.ilovemusic.de/ilm_hits-2023-jahrescharts/"),
+                nextcord.SelectOption(label="I Love Hits Histroy", value="https://play.ilovemusic.de/ilm_ilovehitshistory/"),
+                nextcord.SelectOption(label="I Love Mainstage", value="https://play.ilovemusic.de/ilm_ilovemainstagemadness/"),
+                nextcord.SelectOption(label="I love Malle", value="https://play.ilovemusic.de/ilm_ilovemalle/"),
+                nextcord.SelectOption(label="I Love Mashup", value="https://play.ilovemusic.de/ilm_ilovemashup/"),
+                nextcord.SelectOption(label="I Love Music&Chill", value="https://play.ilovemusic.de/ilm_ilovemusicandchill/"),
+                nextcord.SelectOption(label="I Love Party Hard", value="https://play.ilovemusic.de/ilm_ilovepartyhard/"),
+                nextcord.SelectOption(label="I Love Rock Radio", value="https://play.ilovemusic.de/ilm_iloveradiorock/"),
+                nextcord.SelectOption(label="I Love Sugar Radio", value="https://play.ilovemusic.de/ilm_ilovesugarradio/"),
+                nextcord.SelectOption(label="I Love The 90S", value="https://play.ilovemusic.de/ilm_ilovethe90s/"),
+                nextcord.SelectOption(label="I Love The Beach", value="https://play.ilovemusic.de/ilm_ilovethebeach/"),
+                nextcord.SelectOption(label="I Love The Sun", value="https://play.ilovemusic.de/ilm_ilovethesun/"),
+                nextcord.SelectOption(label="I Love Tomoorowland", value="https://play.ilovemusic.de/ilm-itomorrowland_one_world_radio_germany/"),
+                nextcord.SelectOption(label="I Love Top 100 Charts", value="https://play.ilovemusic.de/ilm_ilovetop100charts/"),
+                nextcord.SelectOption(label="I Love Trash Pop", value="https://play.ilovemusic.de/ilm_ilovetrashpop/"),
+                nextcord.SelectOption(label="I Love US Rap Radio", value="https://play.ilovemusic.de/ilm_iloveusonlyrapradio/"),
+                nextcord.SelectOption(label="I Love Workout", value="https://play.ilovemusic.de/ilm_iloveworkout/"),
+                nextcord.SelectOption(label="I Love XMAS", value="https://play.ilovemusic.de/ilm_ilovexmas/")]  
             voice_client = await inter.user.voice.channel.connect()
             await inter.response.send_message(view=RadioDropdown(options, voice_client), ephemeral=True)
             
-      
+      '''
 def setup(bot: commands.Bot):
 
     bot.add_cog(Voice(bot))

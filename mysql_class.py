@@ -696,8 +696,8 @@ class BotDB:
     ##################################################################################################################
        
     def query_buttons(self, guild_id):
-        self.cursor.execute('SELECT b_extra_one, b_extra_two, b_extra_three, b_extra_four, b_extra_five FROM buttons WHERE guild_id = %s', (guild_id,))
-        output = self.cursor.fetchone()
+        self.cursor.execute('SELECT b_extra_one, b_extra_two, b_extra_three, b_extra_four, b_extra_five, guild_id FROM buttons WHERE guild_id = %s', (guild_id,))
+        output = self.cursor.fetchall()
         if output is not None:
             return output
         else:
