@@ -175,43 +175,56 @@ def main():
     @bot.listen('on_application_command_error')
     async def on_application_command_error(interaction: nextcord.Interaction, error):
         error = getattr(error, "original", error)
-        
+
+        # Ignore Check Failure
         if isinstance(error, ApplicationCheckFailure):
-            pass
-        elif isinstance(error, ApplicationInvokeError):
-            raise error
-        elif isinstance(error, ApplicationError):
-            raise error 
-        elif isinstance(error, NotFound):
-            pass
-        elif isinstance(error, CallableOnCooldown):
-            if error.cooldown.bucket == cooldowns.SlashBucket.guild:
-                pass
-            else:
-                cooldown = nextcord.Embed(description=f"{config.a_cross} This Command is on cooldown. Retry in `{error.retry_after}` seconds.", colour=config.red)
-                await interaction.response.send_message(embed=cooldown)
-        
-        else:
-            error_section = interaction.client.get_channel(1084273834305265737)
-            
-            tb = traceback.format_exception(type(error), error, error.__traceback__)
-            error_msg = '```' + ''.join(tb) + '```'
-            error_details = f"{inspect.getframeinfo(inspect.currentframe()).filename}, {inspect.currentframe().f_lineno} - {error}"
-            
-            error_embed = nextcord.Embed(title=f"Error from {interaction.guild.name}",
-                                    description=str(error_msg)[:1024], colour=config.red)
-            error_embed.add_field(name="Error Details", value=str(error_details)[:1024])
+            return
 
-            error_name = str(error)[:100]
-        
-            thread = await error_section.create_thread(name=error_name, embed=error_embed)
-            await thread.send(content=f"<@&903363204200140831>")
+        # Handle Cooldown Errors
+        if isinstance(error, commands.CommandOnCooldown):
+            cooldown_embed = nextcord.Embed(
+                description=f"⏳ This command is on cooldown! Try again in `{error.retry_after:.1f}` seconds.",
+                colour=0xE74C3C
+            )
             try:
-                await interaction.response.send_message(content="Wow!  You have discovered an error, how does it work?  Anyway... your error has been forwarded to us and we will fix it as quickly as possible.  Thank you for your cooperation and understanding.", ephemeral=True)
+                await interaction.response.send_message(embed=cooldown_embed, ephemeral=True)
+            except nextcord.InteractionResponded:
+                await interaction.followup.send(embed=cooldown_embed, ephemeral=True)
+            return
 
-                raise error
-            except: 
-                raise error
+        # Ignore NotFound (e.g. user deleted message)
+        if isinstance(error, NotFound):
+            return
+
+        # Send error to log channel
+        error_channel = interaction.client.get_channel(1084273834305265737)
+        tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+        error_name = str(error)[:90]
+
+        error_embed = nextcord.Embed(
+            title=f"Error in {interaction.guild.name if interaction.guild else 'DM'}",
+            description=f"```py\n{tb[:1020]}```",
+            colour=0xE74C3C
+        )
+
+        # Add context details
+        error_embed.add_field(name="Command", value=interaction.application_command.qualified_name if interaction.application_command else "Unknown", inline=False)
+        error_embed.add_field(name="User", value=f"{interaction.user} ({interaction.user.id})", inline=False)
+        error_embed.add_field(name="Error", value=str(error), inline=False)
+
+        thread = await error_channel.create_thread(name=f"Error: {error_name}", embed=error_embed)
+        await thread.send(content="<@&903363204200140831>")  # Notify staff
+
+        # Notify the user
+        user_msg = "⚠️ An unexpected error occurred. Our team has been notified and will look into it. Thank you for your understanding!"
+        try:
+            await interaction.response.send_message(content=user_msg, ephemeral=True)
+        except nextcord.InteractionResponded:
+            await interaction.followup.send(content=user_msg, ephemeral=True)
+
+        # Log the error for debugging (optional)
+        print(f"Error in command: {interaction.application_command}")
+        print(tb)
 
 
 
