@@ -88,13 +88,14 @@ class StartUpDB:
                             participants TEXT,
                             winners INTEGER,
                             finished BOOL,
-                            requierement VARCHAR(1500))''')         
+                            requierement VARCHAR(25),
+                            value VARCHAR(1500))''')         
 
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS buttons (
                             b_extra_one VARCHAR(50),
                             b_extra_two VARCHAR(50),
                             b_extra_three VARCHAR(50),
-                            b_extra_four VARCHAR(250),
+                            b_extra_four VARCHAR(1000),
                             b_extra_five VARCHAR(50),
                             guild_id BIGINT)''')  
                      
@@ -614,9 +615,9 @@ class BotDB:
     ##################################################################################################################
     
     
-    def insert_giveaway(self, giveaway_id, time, prize, channel_id, guild_id, participants, winners, requierement):
-        self.cursor.execute('INSERT INTO giveaway (giveaway_id, time, prize, message, channel_id, guild_id, participants, winners, finished, requierement) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', 
-                            (giveaway_id, time, prize, None, channel_id, guild_id, participants, winners, 0, requierement,))
+    def insert_giveaway(self, giveaway_id, time, prize, channel_id, guild_id, participants, winners, requierement, value):
+        self.cursor.execute('INSERT INTO giveaway (giveaway_id, time, prize, message, channel_id, guild_id, participants, winners, finished, requierement, value) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', 
+                            (giveaway_id, time, prize, None, channel_id, guild_id, participants, winners, 0, requierement, value,))
         self.db.commit()
         return True
     
@@ -679,9 +680,11 @@ class BotDB:
         0 = Message\n
         1 = Participants\n
         2 = Channel ID\n
-        3 = Prize'''
+        3 = Prize\n
+        4 = Requirement,
+        5 = Value'''
         
-        self.cursor.execute('SELECT message, participants, channel_id, prize FROM giveaway WHERE giveaway_ID = %s', (giveaway_id,))
+        self.cursor.execute('SELECT message, participants, channel_id, prize, requierement, value FROM giveaway WHERE giveaway_ID = %s', (giveaway_id,))
         output = self.cursor.fetchone()
         if output is not None:
             return output

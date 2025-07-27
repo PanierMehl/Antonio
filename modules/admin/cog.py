@@ -63,8 +63,8 @@ class Admin(commands.Cog, name="Administrator"):
     async def giveaway(self, inter: Interaction):
         pass
  
-    '''
-        @giveaway.subcommand(name="create", description="Create a giveaway",
+
+    @giveaway.subcommand(name="create", description="Create a giveaway",
                          name_localizations={Locale.de: "erstellen", Locale.en_US: "create"},
                          description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})  
     async def giveaway_create(self, inter: Interaction,
@@ -75,50 +75,37 @@ class Admin(commands.Cog, name="Administrator"):
                                                          description_localizations={Locale.de: "Wer darf an diesem Gewinnspiel teilnehmen?",
                                                                                     Locale.en_US: "Who is allowed to participate in this GiveAWay?"},
                                                          choices=["roles", "user"], choice_localizations={"roles":{Locale.de: "rolle", Locale.en_US: "role"},
-                                                                                                          "user": {Locale.de: "mitglied", Locale.en_US: "member"}})):
+                                                                                                          "user": {Locale.de: "mitglied", Locale.en_US: "member"}}, required=False)):
+        print("HELLO")
         
         if entiled is None:
             if inter.locale == "de":
-                await inter.response.send_modal(modal=giveaway_create_de(self.channel, None))
+                await inter.response.send_modal(modal=giveaway_create_de(channel, None, None))
             elif inter.locale == "en_US":
-                await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
+                await inter.response.send_modal(modal=giveaway_create_en(channel, None, None))
             else:
-                await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
+                await inter.response.send_modal(modal=giveaway_create_en(channel, None, None))
         
         
         elif entiled == "roles":
+            await inter.response.defer(ephemeral=True)
             if inter.locale == "de":
-                await inter.response.send_message(view=giveaway_selected_roles_de(channel), ephemeral=True)
+                await inter.edit_original_message(view=giveaway_selected_roles_de(channel))
             elif inter.locale == "en_US":
-                await inter.response.send_message(view=giveaway_selected_roles_en(channel), ephemeral=True)
+                await inter.edit_original_message(view=giveaway_selected_roles_en(channel))
             else:
-                await inter.response.send_message(view=giveaway_selected_roles_en(channel), ephemeral=True)
+                await inter.edit_original_message(view=giveaway_selected_roles_en(channel))
         
         elif entiled == "user":
+            await inter.response.defer(ephemeral=True)
             if inter.locale == "de":
-                await inter.response.send_message(view=giveaway_selected_user_de(channel), ephemeral=True)
+                await inter.edit_original_message(view=giveaway_selected_user_de(channel))
         
             elif inter.locale == "en_US":
-                await inter.response.send_message(view=giveaway_selected_user_en(channel), ephemeral=True)
+                await inter.edit_original_message(view=giveaway_selected_user_en(channel))
             
             else:
-                await inter.response.send_message(view=giveaway_selected_user_en(channel), ephemeral=True)
-    
-        '''
-    @giveaway.subcommand(name="create", description="Create a giveaway",
-                         name_localizations={Locale.de: "erstellen", Locale.en_US: "create"},
-                         description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})  
-    async def giveaway_create(self, inter: Interaction,
-                              channel: nextcord.abc.GuildChannel = SlashOption(channel_types=[nextcord.ChannelType.text], description="What channel should the giveaway be in?", required=True,
-                                                                               name_localizations={Locale.de: "kanal", Locale.en_US: "channel"},
-                                                                               description_localizations={Locale.de:"In welchen Kanal soll die Gewinnspiel statt finden?", Locale.en_US: "What channel should the giveaway be in?"}))
-        if inter.locale == "de":
-            await inter.response.send_modal(modal=giveaway_create_de(self.channel, None))
-        elif inter.locale == "en_US":
-            await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
-        else:
-            await inter.response.send_modal(modal=giveaway_create_en(self.channel, None))
-    
+                await inter.edit_original_message(view=giveaway_selected_user_en(channel))
     
 
         

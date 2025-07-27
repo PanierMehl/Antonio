@@ -32,7 +32,7 @@ class SetupAdminRoleSelect(nextcord.ui.View):
         roles = select.values.roles
         for role in roles:
             pass
-
+                
         data = BotDB().query_server_table(inter.guild.id)
         
         if data is None:

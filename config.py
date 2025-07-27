@@ -61,17 +61,12 @@ a_cross = "<:a_cross:1174409200701550663>"
 a_join = "<:a_added:1177667904850886787>"
 a_leave = "<:a_removed:1177667891122942010>"
 
-#Bot Emojis (TestBot)
-#confirm = "<:Confirmed:1385636712213905498>"
-#giveaway = "<a:Giveaway:1385653154624045179>"
-#join = "<:Join:1385655299872129054>"
-
 
 #Bot Emojis (Main)
 confirm = "<:Confirm:1385636098243432591>"
 giveaway = "<a:Giveaway:1387513889721417849>"
 join = "<:Join:1387513893965795399>"
-
+access_denied = "<:access_denied:1399118846195007709>"
 
 #Farb IDs
 red = nextcord.Colour.red()
