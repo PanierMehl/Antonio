@@ -64,7 +64,7 @@ class Voice(commands.Cog, name="Voice Commands"):
 
     async def radio_autocomplete(self, inter: Interaction, current: str):
         """Autocomplete für Radiosender"""
-        choices = [
+        return [
                         name
                         for name in self.radio_stations.keys()
                         if current.lower() in name.lower()
