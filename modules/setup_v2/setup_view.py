@@ -1,10 +1,9 @@
-import aiosqlite
 import nextcord
 from nextcord import Interaction
 from nextcord.ext.commands import Context
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
 
 #ADMIN-ROLE 
@@ -33,14 +32,14 @@ class SetupAdminRoleSelect(nextcord.ui.View):
         for role in roles:
             pass
                 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_administrator_role(inter.guild.id, role.id)
+            await inter.client.db.insert_administrator_role(inter.guild.id, role.id)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_administrator_role(role.id, inter.guild.id)
+                await inter.client.db.update_administrator_role(role.id, inter.guild.id)
         
         eb = self.children[0]
         eb.disabled = True
@@ -73,7 +72,7 @@ class SetupModerationRoleSelect(nextcord.ui.View):
         
     async def interaction_check(self, inter: nextcord.Interaction):
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
             if self.user == inter.user:
@@ -101,14 +100,14 @@ class SetupModerationRoleSelect(nextcord.ui.View):
         for role in roles:
             pass
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_moderator_role(inter.guild.id, role.id)
+            await inter.client.db.insert_moderator_role(inter.guild.id, role.id)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_moderator_role(role.id, inter.guild.id)
+                await inter.client.db.update_moderator_role(role.id, inter.guild.id)
         
         eb = self.children[0]
         eb.disabled = True
@@ -144,7 +143,7 @@ class SetupSupporterRoleSelect(nextcord.ui.View):
         
     async def interaction_check(self, inter: nextcord.Interaction):
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
             if self.user == inter.user:
@@ -180,14 +179,14 @@ class SetupSupporterRoleSelect(nextcord.ui.View):
         for role in roles:
             pass
         
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_supporter_role(inter.guild.id, role.id)
+            await inter.client.db.insert_supporter_role(inter.guild.id, role.id)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_supporter_role(role.id, inter.guild.id)
+                await inter.client.db.update_supporter_role(role.id, inter.guild.id)
         
         eb = self.children[0]
         eb.disabled = True
@@ -231,14 +230,14 @@ class SetupLanguageSelect(nextcord.ui.View):
         
         selected_option = select.values[0]
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_language(inter.guild.id, selected_option)
+            await inter.client.db.insert_language(inter.guild.id, selected_option)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_language(selected_option, inter.guild.id)
+                await inter.client.db.update_language(selected_option, inter.guild.id)
         
         check_mark_maja_png = nextcord.File("pictures/check_mark_maja.png", filename="check_mark_maja.png")
         reply = nextcord.Embed(title="Language has been set", description=f"Your language is now \n"f"{selected_option}", colour=config.blurple)

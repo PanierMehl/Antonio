@@ -6,7 +6,7 @@ import nextcord as nc
 from nextcord import Embed, Interaction, File
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
 import chat_exporter
 import io
@@ -48,7 +48,7 @@ class SetupTicket_en(nc.ui.Modal):
                 b_one_id = generate_random_id(8)
                 view = TicketMain_One_V2(self.button_one_label.value, f_re, b_one_id)
                 await inter.edit_original_message(view=view) 
-                BotDB().insert_ticket_system(f_re, "1", inter.guild_id, channel, category, self.button_one_label.value, None, None, b_one_id, None, None)
+                await inter.client.db.insert_ticket_system(f_re, "1", inter.guild_id, channel, category, self.button_one_label.value, None, None, b_one_id, None, None)
 
             elif self.button_two_label.value:
                 if not self.button_three_label.value:
@@ -56,7 +56,7 @@ class SetupTicket_en(nc.ui.Modal):
                     b_two_id = generate_random_id(8)
                     view = TicketMain_Two_V2(self.button_one_label.value, self.button_two_label.value, f_re, b_one_id, b_two_id)
                     await inter.edit_original_message(view=view)
-                    BotDB().insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
+                    await inter.client.db.insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
 
                 else:
                     b_one_id = generate_random_id(8)
@@ -64,7 +64,7 @@ class SetupTicket_en(nc.ui.Modal):
                     b_three_id = generate_random_id(8)
                     view = TicketMain_Three_V2(self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, f_re, b_one_id, b_two_id, b_three_id)
                     await inter.edit_original_message(view=view) 
-                    BotDB().insert_ticket_system(f_re, "3", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, b_one_id, b_two_id, b_three_id)
+                    await inter.client.db.insert_ticket_system(f_re, "3", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, b_one_id, b_two_id, b_three_id)
 
             
             elif self.button_three_label.value:
@@ -72,7 +72,7 @@ class SetupTicket_en(nc.ui.Modal):
                 b_two_id = generate_random_id(8)
                 view = TicketMain_Two_V2(self.button_one_label.value, self.button_two_label.value, f_re, b_one_id, b_two_id)
                 await inter.edit_original_message(view=view)
-                BotDB().insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
+                await inter.client.db.insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
 
 class SetupTicket_de(nc.ui.Modal):
     def __init__(self):
@@ -104,7 +104,7 @@ class SetupTicket_de(nc.ui.Modal):
                 b_one_id = generate_random_id(8)
                 view = TicketMain_One_V2(self.button_one_label.value, f_re, b_one_id)
                 await inter.edit_original_message(view=view) 
-                BotDB().insert_ticket_system(f_re, "1", inter.guild_id, channel, category, self.button_one_label.value, None, None, b_one_id, None, None)
+                await inter.client.db.insert_ticket_system(f_re, "1", inter.guild_id, channel, category, self.button_one_label.value, None, None, b_one_id, None, None)
 
             elif self.button_two_label.value:
                 if not self.button_three_label.value:
@@ -112,7 +112,7 @@ class SetupTicket_de(nc.ui.Modal):
                     b_two_id = generate_random_id(8)
                     view = TicketMain_Two_V2(self.button_one_label.value, self.button_two_label.value, f_re, b_one_id, b_two_id)
                     await inter.edit_original_message(view=view)
-                    BotDB().insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
+                    await inter.client.db.insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
 
                 else:
                     b_one_id = generate_random_id(8)
@@ -120,7 +120,7 @@ class SetupTicket_de(nc.ui.Modal):
                     b_three_id = generate_random_id(8)
                     view = TicketMain_Three_V2(self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, f_re, b_one_id, b_two_id, b_three_id)
                     await inter.edit_original_message(view=view) 
-                    BotDB().insert_ticket_system(f_re, "3", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, b_one_id, b_two_id, b_three_id)
+                    await inter.client.db.insert_ticket_system(f_re, "3", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, self.button_three_label.value, b_one_id, b_two_id, b_three_id)
 
             
             elif self.button_three_label.value:
@@ -128,7 +128,7 @@ class SetupTicket_de(nc.ui.Modal):
                 b_two_id = generate_random_id(8)
                 view = TicketMain_Two_V2(self.button_one_label.value, self.button_two_label.value, f_re, b_one_id, b_two_id)
                 await inter.edit_original_message(view=view)
-                BotDB().insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
+                await inter.client.db.insert_ticket_system(f_re, "2", inter.guild_id, channel, category, self.button_one_label.value, self.button_two_label.value, None, b_one_id, b_two_id, None)
 
 
 def generate_random_id(length):
@@ -143,7 +143,7 @@ class TicketMain_One_V2(nc.ui.View):
         self.message_id = message_id
     
     async def check_if_ticket_is_already_open(self, inter: Interaction):
-        ticket_check = BotDB().query_tickets_by_user(inter.guild.id, inter.user.id)
+        ticket_check = await inter.client.db.query_tickets_by_user(inter.guild.id, inter.user.id)
         if not ticket_check:
             return None
         else:
@@ -158,7 +158,7 @@ class TicketMain_One_V2(nc.ui.View):
                                                 ephemeral=True)
         
         if await self.check_if_ticket_is_already_open(inter) is None:
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -192,7 +192,7 @@ class TicketMain_One_V2(nc.ui.View):
             else:
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -216,7 +216,7 @@ class TicketMain_Two_V2(nc.ui.View):
         self.message_id = message_id
     
     async def check_if_ticket_is_already_open(self, inter: Interaction):
-        ticket_check = BotDB().query_tickets_by_user(inter.guild.id, inter.user.id)
+        ticket_check = await inter.client.db.query_tickets_by_user(inter.guild.id, inter.user.id)
         if not ticket_check:
             return None
         else:
@@ -233,7 +233,7 @@ class TicketMain_Two_V2(nc.ui.View):
         
         if await self.check_if_ticket_is_already_open(inter) is None:
             
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -268,7 +268,7 @@ class TicketMain_Two_V2(nc.ui.View):
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
 
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -289,7 +289,7 @@ class TicketMain_Two_V2(nc.ui.View):
         
         if await self.check_if_ticket_is_already_open(inter) is None:
             
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -324,7 +324,7 @@ class TicketMain_Two_V2(nc.ui.View):
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
 
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -349,7 +349,7 @@ class TicketMain_Three_V2(nc.ui.View):
         self.message_id = message_id
     
     async def check_if_ticket_is_already_open(self, inter: Interaction):
-        ticket_check = BotDB().query_tickets_by_user(inter.guild.id, inter.user.id)
+        ticket_check = await inter.client.db.query_tickets_by_user(inter.guild.id, inter.user.id)
         if not ticket_check:
             return None
         else:
@@ -367,7 +367,7 @@ class TicketMain_Three_V2(nc.ui.View):
                                                 ephemeral=True)
         
         if await self.check_if_ticket_is_already_open(inter) is None:
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -402,7 +402,7 @@ class TicketMain_Three_V2(nc.ui.View):
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
                 
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -422,7 +422,7 @@ class TicketMain_Three_V2(nc.ui.View):
                                                 ephemeral=True)
         
         if await self.check_if_ticket_is_already_open(inter) is None:
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -457,7 +457,7 @@ class TicketMain_Three_V2(nc.ui.View):
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
 
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -477,7 +477,7 @@ class TicketMain_Three_V2(nc.ui.View):
                                                 ephemeral=True)
         
         if await self.check_if_ticket_is_already_open(inter) is None:
-            roles = BotDB().query_server_table(inter.guild.id)
+            roles = await inter.client.db.query_server_table(inter.guild.id)
             if roles:
                 admin_role_id, moderator_role_id, supporter_role_id = roles[1], roles[2], roles[3]
                 if admin_role_id:
@@ -512,7 +512,7 @@ class TicketMain_Three_V2(nc.ui.View):
                 pin = await create.send(content=inter.user.mention, embed=info, view=Ticket_Options_en(self.message_id))
                 await pin.pin(reason="Ticket Info Message")
 
-            BotDB().insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
+            await inter.client.db.insert_ticket(create.id, inter.guild.id, inter.user.id, config.aktuelldatum, None)
 
             cc = Embed(title=self.trans["view"]["ticket"]["cc"]["title"][inter.locale].format(emoji=config.a_support, create=create.id, tic=config.a_tic, mention=create.mention), colour=config.green)
             await msg.edit(embed=cc, content="")
@@ -545,7 +545,7 @@ class TicketSystem_Del_en(nc.ui.View):
         load = Embed(title=self.trans["view"]["ts_delete"]["load"][inter.locale].format(emoji=config.e_loading), colour=config.blue)
         await inter.response.send_message(embed=load, ephemeral=True)
         
-        BotDB().delete_ticket_system(self.guild_id, self.message_id)
+        await inter.client.db.delete_ticket_system(self.guild_id, self.message_id)
         button.disabled = True
         
         org_c = inter.guild.get_channel(self.channel_id)
@@ -582,7 +582,7 @@ class TicketSystem_Del_de(nc.ui.View):
         load = Embed(title=self.trans["view"]["ts_delete"]["load"][inter.locale].format(emoji=config.e_loading), colour=config.blue)
         await inter.response.send_message(embed=load, ephemeral=True)
         
-        BotDB().delete_ticket_system(self.guild_id, self.message_id)
+        await inter.client.db.delete_ticket_system(self.guild_id, self.message_id)
         button.disabled = True
         
         org_c = inter.guild.get_channel(self.channel_id)
@@ -610,7 +610,7 @@ class Ticket_Options_en(nc.ui.View):
                 break
 
     async def check_staff_permissions(self, inter: Interaction):
-        roles_data = BotDB().query_server_table(inter.guild.id)
+        roles_data = await inter.client.db.query_server_table(inter.guild.id)
         if roles_data:
             admin_role_id = roles_data[1]
             moderator_role_id = roles_data[2]
@@ -631,7 +631,7 @@ class Ticket_Options_en(nc.ui.View):
     @nc.ui.button(label="Open Ticket", style=nc.ButtonStyle.green, row=1, emoji=config.a_unlock, disabled=True)
     async def open_ticket(self, button: nc.ui.Button, inter: Interaction):
         if await self.check_staff_permissions(inter):
-            ticket_query = BotDB().query_ticket_informations(inter.channel.id)
+            ticket_query = await inter.client.db.query_ticket_informations(inter.channel.id)
             if not ticket_query:
                 err = Embed(title=f"Ticket infotmation not found in database {config.a_cross}", colour=config.red)
                 await inter.response.send_message(embed=err)
@@ -674,7 +674,7 @@ class Ticket_Options_en(nc.ui.View):
     async def close_ticket(self, button: nc.ui.Button, inter: Interaction):
 
         if await self.check_staff_permissions(inter):
-            ticket_query = BotDB().query_ticket_informations(inter.channel.id)
+            ticket_query = await inter.client.db.query_ticket_informations(inter.channel.id)
             if not ticket_query:
                 await inter.response.send_message(content="Ticket information not found in database.")
                 return
@@ -783,7 +783,7 @@ class Ticket_Options_en(nc.ui.View):
 
         db_succeeded = True
         try:
-            BotDB().delete_ticket(inter.channel.id, inter.guild.id)
+            await inter.client.db.delete_ticket(inter.channel.id, inter.guild.id)
         except Exception as e:
             print(f"Error deleting ticket from database: {e}")
             db_succeeded = False
@@ -849,7 +849,7 @@ class Ticket_Options_de(nc.ui.View):
                 break
 
     async def check_staff_permissions(self, inter: Interaction):
-        roles_data = BotDB().query_server_table(inter.guild.id)
+        roles_data = await inter.client.db.query_server_table(inter.guild.id)
         if roles_data:
             admin_role_id = roles_data[1]
             moderator_role_id = roles_data[2]
@@ -871,7 +871,7 @@ class Ticket_Options_de(nc.ui.View):
     async def open_ticket(self, button: nc.ui.Button, inter: Interaction):
         
         if await self.check_staff_permissions(inter):
-            ticket_query = BotDB().query_ticket_informations(inter.channel.id)
+            ticket_query = await inter.client.db.query_ticket_informations(inter.channel.id)
             if not ticket_query:
                 await inter.response.send_message("Ticket-Informationen nicht in der Datenbank gefunden.", ephemeral=True)
                 return
@@ -910,7 +910,7 @@ class Ticket_Options_de(nc.ui.View):
     async def close_ticket(self, button: nc.ui.Button, inter: Interaction):
 
         if await self.check_staff_permissions(inter):
-            ticket_query = BotDB().query_ticket_informations(inter.channel.id)
+            ticket_query = await inter.client.db.query_ticket_informations(inter.channel.id)
             if not ticket_query:
                 await inter.edit_original_message(content="Ticket-Informationen nicht in der Datenbank gefunden.")
                 return
@@ -1017,7 +1017,7 @@ class Ticket_Options_de(nc.ui.View):
 
         db_succeeded = True
         try:
-            BotDB().delete_ticket(inter.channel.id, inter.guild.id)
+            await inter.client.db.delete_ticket(inter.channel.id, inter.guild.id)
         except Exception as e:
             print(f"Fehler beim Löschen des Tickets aus der Datenbank: {e}")
             db_succeeded = False

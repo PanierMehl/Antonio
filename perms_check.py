@@ -3,15 +3,15 @@ from nextcord.ext import application_checks, commands
 from nextcord import Interaction, Embed
 
 import config
-from mysql_class import BotDB
 
+from mysql_asyncmy import A_DB
 import aiosqlite
 
 
 ##################################################################################################################
 
 async def get_admin_role(inter: Interaction):
-    check = BotDB().query_server_table(inter.guild.id)
+    check = await inter.client.db.query_server_table(inter.guild.id)
                     
     if check is None:
         admin_role = None
@@ -23,7 +23,7 @@ async def get_admin_role(inter: Interaction):
 ##################################################################################################################
 
 async def get_moderator_role(inter: Interaction):
-    check = BotDB().query_server_table(inter.guild.id)
+    check = await inter.client.db.query_server_table(inter.guild.id)
                     
     if check is None:
         moderator_role = None
@@ -35,7 +35,7 @@ async def get_moderator_role(inter: Interaction):
 ##################################################################################################################
 
 async def get_supporter_role(inter: Interaction):
-    check = BotDB().query_server_table(inter.guild.id)
+    check = await inter.client.db.query_server_table(inter.guild.id)
                     
     if check is None:
         supporter_role = None
@@ -130,7 +130,7 @@ def check_vip_status():
         fail = Embed(title=f"{config.a_cross} No active VIP status available.", description=f"There is currently no active VIP status for this server.  This means you cannot access VIP functions.  If you have VIP status but it is not registered, please contact us [here]({config.universal_invite}).", colour=config.red)
 
 
-        check = BotDB().query_server_table(inter.guild.id)
+        check = await inter.client.db.query_server_table(inter.guild.id)
         if check is None:
             await inter.response.send_message(embed=fail, ephemeral=True)
             return False

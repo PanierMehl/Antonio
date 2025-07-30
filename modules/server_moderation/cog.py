@@ -1,5 +1,3 @@
-import asyncio
-import aiosqlite
 import cooldowns
 
 import nextcord
@@ -10,7 +8,6 @@ import config
 from modules.server_moderation.view import ChannelRename, ChannelSlowmode
 from modules.server_moderation.view import PermissionOverwriteView
 import perms_check
-from mysql_class import BotDB
 import yaml
 
 

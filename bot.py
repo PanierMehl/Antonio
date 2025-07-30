@@ -4,29 +4,35 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import random
 
-from mysql_class import BotDB, StartUpDB
 import cooldowns
 import nextcord
 import pytz
-import inspect
+import logging
 from cooldowns import CallableOnCooldown
 from dotenv import load_dotenv
 from nextcord import (ApplicationCheckFailure, ApplicationError,
                       ApplicationInvokeError, NotFound, Embed, Interaction, )
 from nextcord.ext import commands, tasks
 
-import aiosqlite
 import asyncio 
 import config
-import traceback
 from rich.markdown import Markdown
 from rich.console import Console
 from rich.table import Table
 #from discord.ext.ipc import Server, ClientPayload
 from modules.ticket_system.view import TicketMain_One_V2, TicketMain_Two_V2, TicketMain_Three_V2
-from modules.admin.view import join_giveawy_en, join_giveawy_de
+from modules.admin.view import join_giveawy_en, join_giveawy_de, TranscriptButton
+from mysql_asyncmy import A_DB
 
-import yaml
+
+'''
+import asyncio
+asyncio.get_event_loop().set_debug(True)
+
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+'''
 
 cwd = Path(__file__).parents[0]
 cwd = str(cwd)
@@ -44,7 +50,6 @@ def main():
     bot.cwd = cwd
     #ipc = Server(bot=bot, secret_key="lol")
     
-    StartUpDB()
 ##################################################################################################################################################################  
     
     # load all cogs
@@ -94,11 +99,17 @@ def main():
 
     @bot.listen('on_ready')
     async def on_ready():
+        
+        bot.db = A_DB()
+        await bot.db.connect()
+        await bot.db.create_tables()
+        print(await bot.db.query_server_table("900100165397008465"))
+        
         nonlocal persistent_view_added
         if not persistent_view_added:
             for guild in bot.guilds:
                 
-                ts_query = BotDB().query_ticket_system(guild.id)
+                ts_query = await bot.db.query_ticket_system(guild.id)
                 if ts_query is not None:
                     if ts_query[1] == "1":
                         bot.add_view(TicketMain_One_V2(ts_query[5], ts_query[0], ts_query[8]))
@@ -107,7 +118,7 @@ def main():
                     if ts_query[1] == "3":
                         bot.add_view(TicketMain_Three_V2(ts_query[5], ts_query[6], ts_query[7], ts_query[0], ts_query[8], ts_query[9], ts_query[10]))
 
-                buttons_query = BotDB().query_buttons(guild.id)
+                buttons_query = await bot.db.query_buttons(guild.id)
                 if buttons_query is not None:
                     for buttons in buttons_query:
                         if buttons[0] == "en":
@@ -200,9 +211,19 @@ def main():
         if isinstance(error, NotFound):
             return
 
+        # Debugging-Ausgabe in der Konsole:
+        print("=== Application Command Error Debug ===")
+        print(f"Guild: {interaction.guild.name if interaction.guild else 'DM'} (ID: {interaction.guild.id if interaction.guild else 'N/A'})")
+        print(f"User: {interaction.user} (ID: {interaction.user.id})")
+        print(f"Command: {interaction.application_command.qualified_name if interaction.application_command else 'Unknown'}")
+        print(f"Error Type: {type(error).__name__}")
+        import traceback
+        tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+        print(tb)
+        print("=== End of Debug ===")
+
         # Send error to log channel
         error_channel = interaction.client.get_channel(1084273834305265737)
-        tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
         error_name = str(error)[:90]
 
         error_embed = nextcord.Embed(
@@ -225,10 +246,6 @@ def main():
             await interaction.response.send_message(content=user_msg, ephemeral=True)
         except nextcord.InteractionResponded:
             await interaction.followup.send(content=user_msg, ephemeral=True)
-
-        # Log the error for debugging (optional)
-        print(f"Error in command: {interaction.application_command}")
-        print(tb)
 
 
 
@@ -272,10 +289,10 @@ def main():
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
-        stats = BotDB().level_user_query(user, guild)
+        stats = await bot.db.level_user_query(user, guild)
         
         if stats is None:
-            BotDB().level_insert_new_user(user, guild)
+            await bot.db.level_insert_new_user(user, guild)
             return
                     
         old_xp_count = float(stats[0] or 0)
@@ -292,7 +309,7 @@ def main():
                 
                 if old_level != new_lvl:
                     await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}", delete_after=10)
-                BotDB().level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
+                await bot.db.level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
                 return
             else:
                 pass
@@ -305,7 +322,7 @@ def main():
             
             if old_level < new_lvl:
                 await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}")
-            BotDB().level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
+            await bot.db.level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
             return
                         
                 
@@ -313,14 +330,14 @@ def main():
             
         # G L O B A L - C H A T
     
-        _check_global_exists = BotDB().query_server_table(message.guild.id)
+        _check_global_exists = await bot.db.query_server_table(message.guild.id)
                                     
         channel = message.channel
         if _check_global_exists is None:
             return
         
         if _check_global_exists is not None:
-            _get_all_global_ids = BotDB().query_all_global_channels()
+            _get_all_global_ids = await bot.db.query_all_global_channels()
             
             
             if channel.id == _check_global_exists[4]:
@@ -364,9 +381,9 @@ def main():
             
     @bot.event
     async def on_guild_channel_delete(channel: nextcord.abc.GuildChannel):
-        check = BotDB().query_ticket_informations(channel.id)
+        check = await bot.db.query_ticket_informations(channel.id)
         if check is not None:
-            BotDB().delete_ticket(channel.id, channel.guild.id)
+            await bot.db.delete_ticket(channel.id, channel.guild.id)
             return True
         else:
             pass     
@@ -387,10 +404,11 @@ def main():
         await bot.change_presence(activity=new_status)
 
 
-    @tasks.loop(seconds=0.2)
+
+    @tasks.loop(seconds=0.5)
     async def check_giveaway_ending():
         current_time = datetime.now(timezone.utc)  # Zeit mit Zeitzoneninfo
-        giveaways = BotDB().get_giveaway_ending()
+        giveaways = await bot.db.get_giveaway_ending()
         for giveaway in giveaways:
             if giveaway is None:
                 continue
@@ -406,24 +424,24 @@ def main():
             
             time_since_end = current_time - giveaway_end_time
             if time_since_end >= timedelta(hours=12):
-                BotDB().remove_giveaway(giveaway_end_time, guild_id)
+                await bot.db.remove_giveaway(giveaway_end_time, guild_id)
                 
             elif timedelta(seconds=1) <= time_since_end <= timedelta(seconds=749):
                 
                 if finished == 1:
                     continue
                 else:
-                    winners_tuple = BotDB().determine_winners(giveaway_id)
+                    winners_tuple = await bot.db.determine_winners(giveaway_id)
                     winners_str = winners_tuple[0]
                     num_winners = winners_tuple[1]
-                    BotDB().mark_giveaway_as_finished(giveaway_id, True)
+                    await bot.db.mark_giveaway_as_finished(giveaway_id, True)
                     
                     guild = bot.get_guild(guild_id)
                     if guild:
                         channel = guild.get_channel(channel_id)
                         if channel:
                             try:
-                                message = await channel.fetch_message(message_id)
+                                message = channel.get_partial_message(message_id)
                                 
                                 if winners_str is None:
                                     embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
@@ -450,27 +468,31 @@ def main():
 
 
                                 winner_mentions = ', '.join(f"<@{winner_id.strip()}>" for winner_id in selected_winners)
-                                l = BotDB().query_server_table(guild_id)
-                                if l[5] == "English":
-                                    embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
-                                    embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
-                                    embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
-                                    embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
-                                    embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
-                                    await message.edit(embed=embed, view=None)
-                                    
-                                    await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
-                                    
-                                elif l[5] == "German":
-                                    embed = nextcord.Embed(title="🎉 Gewinnspiel beendet 🎉", description="Das Gewinnspiel ist beendet, eine weitere Teilnahme ist nicht möglich!", colour=config.red)
-                                    embed.add_field(name="Gewinner", value=f"{winner_mentions}\n\uFEFF")
-                                    embed.add_field(name="Preis", value=f"{prize}\n\uFEFF")
-                                    embed.add_field(name="Teilnehmer", value=f"{len(participants)}\n\uFEFF")
-                                    embed.set_footer(text=f"Gewinnspiel ID: {giveaway_id}")
-                                    await message.edit(embed=embed, view=None)
-                                    
-                                    await channel.send(content=f"{winner_mentions} hat das Gewinnspiel `{giveaway_id}` gewonnen. Glückwunsch.")
-                                    
+                                l = await bot.db.query_server_table(guild_id)
+                                if l is not None:
+                                    if l[5] == "English":
+                                        view = TranscriptButton(participants_data)
+                                        embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
+                                        embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
+                                        embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
+                                        embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
+                                        embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
+                                        await message.edit(embed=embed, view=view)
+                                        
+                                        await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
+                                        
+                                    elif l[5] == "German":
+                                        view = TranscriptButton(participants_data)
+                                        embed = nextcord.Embed(title="🎉 Gewinnspiel beendet 🎉", description="Das Gewinnspiel ist beendet, eine weitere Teilnahme ist nicht möglich!", colour=config.red)
+                                        embed.add_field(name="Gewinner", value=f"{winner_mentions}\n\uFEFF")
+                                        embed.add_field(name="Preis", value=f"{prize}\n\uFEFF")
+                                        embed.add_field(name="Teilnehmer", value=f"{len(participants)}\n\uFEFF")
+                                        embed.set_footer(text=f"Gewinnspiel ID: {giveaway_id}")
+                                        #await message.edit(embed=embed, view=view)
+                                        await message.edit(embed=embed, view=None)
+                                        
+                                        await channel.send(content=f"{winner_mentions} hat das Gewinnspiel `{giveaway_id}` gewonnen. Glückwunsch.")
+                                        
                                 else:
                                     embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
                                     embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
@@ -492,7 +514,6 @@ def main():
                 continue 
                 
                 
-
 
 
 ######################################################################################################

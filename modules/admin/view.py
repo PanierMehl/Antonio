@@ -6,11 +6,11 @@ import pytz
 from datetime import datetime
 import humanfriendly
 import time as pyTime
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 import random
 import string
 import json
-import yaml
+from io import BytesIO
 
 def generate_random_id(length):
     characters = string.digits
@@ -33,11 +33,10 @@ class giveaway_create_en(nc.ui.Modal):
                             
     async def callback(self, inter: nc.Interaction):
         time = humanfriendly.parse_timespan(self.time.value)
-        epochEnd = pyTime.time() + time
+        epochEnd = int(pyTime.time() + time)
         giveaway_id = generate_random_id(8)
-        
         value_str = ",".join(map(str, self.value)) if isinstance(self.value, list) else str(self.value)
-        BotDB().insert_giveaway(giveaway_id, int(epochEnd), self.prize.value, self.channel.id, inter.guild.id, None, self.winners.value, self.requirement, value_str)
+        await inter.client.db.insert_giveaway(giveaway_id, epochEnd, self.prize.value, self.channel.id, inter.guild.id, None, self.winners.value, self.requirement, value_str)
         
         if str(self.requirement).lower() == "role":
             mention_text = f"<@&{self.value}>"
@@ -65,8 +64,8 @@ class giveaway_create_en(nc.ui.Modal):
         embed_data = msg.embeds[0].to_dict()  # Convert the Embed object to a dictionary
         embed_json_string = json.dumps(embed_data) # Convert the dictionary to a JSON string
 
-        BotDB().update_giveaway(msg.id, inter.guild.id, giveaway_id)
-        BotDB().insert_button("en", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
+        await inter.client.db.update_giveaway(msg.id, inter.guild.id, giveaway_id)
+        await inter.client.db.insert_button("en", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
     
     
 class giveaway_create_de(nc.ui.Modal):
@@ -86,11 +85,9 @@ class giveaway_create_de(nc.ui.Modal):
     async def callback(self, inter: nc.Interaction):
         time = humanfriendly.parse_timespan(self.time.value)
         epochEnd = int(pyTime.time() + time)
-        print(f"epoch_end {epochEnd}")
         giveaway_id = generate_random_id(8)
-        
         value_str = ",".join(map(str, self.value)) if isinstance(self.value, list) else str(self.value)
-        BotDB().insert_giveaway(giveaway_id, epochEnd, self.prize.value, self.channel.id, inter.guild.id, None, self.winners.value, self.requirement, value_str)
+        await inter.client.db.insert_giveaway(giveaway_id, epochEnd, self.prize.value, self.channel.id, inter.guild.id, None, self.winners.value, self.requirement, value_str)
         
         if str(self.requirement).lower() == "role":
             mention_text = f"<@&{self.value}>"
@@ -118,8 +115,8 @@ class giveaway_create_de(nc.ui.Modal):
         embed_data = msg.embeds[0].to_dict()  # Convert the Embed object to a dictionary
         embed_json_string = json.dumps(embed_data) # Convert the dictionary to a JSON string
 
-        BotDB().update_giveaway(msg.id, inter.guild.id, giveaway_id)
-        BotDB().insert_button("de", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
+        await inter.client.db.update_giveaway(msg.id, inter.guild.id, giveaway_id)
+        await inter.client.db.insert_button("de", inter.guild.id, giveaway_id, embed_json_string, None, inter.guild.id)
        
         
 class join_giveawy_en(nc.ui.View):
@@ -137,13 +134,13 @@ class join_giveawy_en(nc.ui.View):
     @nc.ui.button(label="Join Giveaway", style=nc.ButtonStyle.blurple, emoji="🎁")
     async def giveaway_join(self, button: nc.ui.Button, inter: Interaction):
         await inter.response.defer(ephemeral=True)
-        data = BotDB().fetch_giveaway_participants(inter.guild.id, self.giveaway_id)
-        req = BotDB().query_giveaway_data(self.giveaway_id)
+        data = await inter.client.db.fetch_giveaway_participants(inter.guild.id, self.giveaway_id)
+        req = await inter.client.db.query_giveaway_data(self.giveaway_id)
         
         try:
             current_embed = self.message.embeds[0]
         except:
-            abc = BotDB().ga_embed_data(self.giveaway_id)
+            abc = await inter.client.db.ga_embed_data(self.giveaway_id)
             current_embed = abc[0]
 
         if data:
@@ -212,7 +209,7 @@ class join_giveawy_en(nc.ui.View):
             await inter.response.send_message(embed=giveaway_joined, ephemeral=True)
 
             participants.append(inter.user.id)
-            BotDB().update_giveaway_participants(
+            await inter.client.db.update_giveaway_participants(
                 json.dumps(participants),
                 inter.guild.id,
                 self.giveaway_id
@@ -237,13 +234,13 @@ class join_giveawy_de(nc.ui.View):
     
     @nc.ui.button(label="Mitmachen", style=nc.ButtonStyle.blurple, emoji="🎁")
     async def giveaway_join(self, button: nc.ui.Button, inter: Interaction):
-        data = BotDB().fetch_giveaway_participants(inter.guild.id, self.giveaway_id)
-        req = BotDB().query_giveaway_data(self.giveaway_id)  # Hier prüfen wir die Bedingungen
+        data = await inter.client.db.fetch_giveaway_participants(inter.guild.id, self.giveaway_id)
+        req = await inter.client.db.query_giveaway_data(self.giveaway_id)  # Hier prüfen wir die Bedingungen
         
         try:
             current_embed = self.message.embeds[0]
         except:
-            abc = BotDB().ga_embed_data(self.giveaway_id)
+            abc = await inter.client.db.ga_embed_data(self.giveaway_id)
             current_embed = abc[0]
 
         if data:
@@ -312,7 +309,7 @@ class join_giveawy_de(nc.ui.View):
             await inter.response.send_message(embed=giveaway_joined, ephemeral=True)
 
             participants.append(inter.user.id)
-            BotDB().update_giveaway_participants(
+            await inter.client.db.update_giveaway_participants(
                 json.dumps(participants),
                 inter.guild.id,
                 self.giveaway_id
@@ -407,3 +404,101 @@ class giveaway_selected_user_en(nc.ui.View):
             
         else:
             await inter.response.send_modal(modal=giveaway_create_en(self.channel, "user", users))
+            
+            
+class TranscriptButton(nc.ui.View):
+    def __init__(self, participants_data, winners, giveaway_id, prize, ended):
+        super().__init__(timeout=180)
+        self.participants_data = participants_data
+        self.winners = winners
+        self.giveaway_id = giveaway_id
+        self.prize = prize
+        self.ended = ended
+
+
+@nc.ui.button(style=nc.ButtonStyle.primary, label="📄 Teilnehmerliste (HTML)")
+async def tr_button(self, button: nc.ui.Button, interaction: nc.Interaction):
+    try:
+        participants = json.loads(self.participants_data)
+    except Exception as e:
+        await interaction.response.send_message(
+            content=f"❌ Fehler beim Verarbeiten der Teilnehmerdaten:\n`{e}`",
+            ephemeral=True
+        )
+        return
+
+    winners = self.winners  # Liste von User-IDs als Strings
+    guild = interaction.guild
+
+    def user_block(user, is_winner=False):
+        tag = f"{user.name}#{user.discriminator}"
+        avatar = user.display_avatar.url
+        uid = user.id
+        winner_class = "winner" if is_winner else ""
+        return f"""
+        <div class="user {winner_class}">
+            <img src="{avatar}" alt="{tag}">
+            <div class="text">
+                <strong>{tag}</strong><br>
+                <span>({uid})</span>
+            </div>
+        </div>
+        """
+
+    winner_html = ""
+    entrant_html = ""
+
+    for uid in participants:
+        member = guild.get_member(int(uid))
+        if member:
+            block = user_block(member, is_winner=(str(member.id) in winners))
+            if str(member.id) in winners:
+                winner_html += block
+            else:
+                entrant_html += block
+
+    html_template = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Giveaway Transkript</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; background-color: #b7c7f0; padding: 20px; color: #333; }}
+        h1 {{ color: #3b3b3b; }}
+        .user {{
+            display: flex; align-items: center; margin: 10px 0;
+            background: #dbe4ff; padding: 10px; border-radius: 10px;
+        }}
+        .user img {{
+            width: 48px; height: 48px; border-radius: 50%; margin-right: 10px;
+        }}
+        .winner {{ border: 2px solid gold; background-color: #fff8dc; }}
+        .text strong {{ font-size: 16px; }}
+        .section-title {{ margin-top: 30px; font-size: 22px; color: #2c2c2c; }}
+    </style>
+</head>
+<body>
+    <h1>Giveaway Transkript</h1>
+    <p><strong>Giveaway ID:</strong> {self.giveaway_id}</p>
+    <p><strong>Prize:</strong> {self.prize}</p>
+    <p><strong>Ended:</strong> {self.ended}</p>
+
+    <div class="section-title">🎉 Winners</div>
+    {winner_html or "<p>No winners</p>"}
+
+    <div class="section-title">👥 Entrants</div>
+    {entrant_html or "<p>No participants</p>"}
+</body>
+</html>
+"""
+
+    # Encode & senden
+    buffer = BytesIO(html_template.encode("utf-8"))
+    file = nc.File(buffer, filename="giveaway_transcript.html")
+
+    await interaction.response.send_message(
+        content="📄 HTML-Teilnehmerliste:",
+        file=file,
+        ephemeral=True
+    )

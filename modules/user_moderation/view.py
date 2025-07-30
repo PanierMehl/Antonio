@@ -1,13 +1,11 @@
 import nextcord as nc
 from nextcord import File, Embed
 import config
-import aiosqlite
 import random
 import string
-import time
 import asyncio
 from datetime import timedelta
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
 
 #############################################################################################################
@@ -50,13 +48,13 @@ class NewWarnModal(nc.ui.Modal):
 
         current_time = config.aktuelldatum
         
-        all_cases = BotDB().query_all_case_ids_with_type(self.target.id, inter.guild.id, "Warning")
+        all_cases = await inter.client.db.query_all_case_ids_with_type(self.target.id, inter.guild.id, "Warning")
         
         c = 1
         for case in all_cases:
             c += 1
         
-        BotDB().insert_case(inter.guild.id, self.target.id, inter.user.id, current_time, self.reason.value, None, random_id, "Warning", "Open")
+        await inter.client.db.insert_case(inter.guild.id, self.target.id, inter.user.id, current_time, self.reason.value, None, random_id, "Warning", "Open")
         
         try:
             await self.target.send(embed=user_dm, file=warn_png)
@@ -90,7 +88,7 @@ class EditCaseDropdown(nc.ui.View):
     @nc.ui.button(label="Page Back", style=nc.ButtonStyle.blurple, row=1, disabled=True)
     async def page_back(self, button: nc.ui.Button, inter: nc.Interaction):
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -102,7 +100,7 @@ class EditCaseDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 1
             button_back.label = f"Page {button_count}"
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
             button_next.disabled = False
             if offset_count == 0:
                 button_back.disabled = True
@@ -111,7 +109,7 @@ class EditCaseDropdown(nc.ui.View):
                 button_back.disabled = False
             for case in cases:
                 button_next.label = f"Page {button_count + 1}"
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -124,7 +122,7 @@ class EditCaseDropdown(nc.ui.View):
     async def next_page(self, button: nc.ui.Button, inter: nc.Interaction):
         button_count = int(button.label.split()[1]) if button.label else 1
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -136,8 +134,8 @@ class EditCaseDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 2
             back_label = button_count - 1
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
-            next_cases_check = BotDB().query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            next_cases_check = await inter.client.db.query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
             button_back.disabled = False
             
             button_back.label = f"Page {back_label}"
@@ -148,7 +146,7 @@ class EditCaseDropdown(nc.ui.View):
                 await inter.response.edit_message(view=self)
                 return
             for case in cases:
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -172,7 +170,7 @@ class SelectEditWarn(nc.ui.Select):
     
     async def callback(self, inter: nc.Interaction):
         select_value = self.values[0].split()[1]
-        query = BotDB().query_case_with_user(self.target, inter.guild.id, select_value)
+        query = await inter.client.db.query_case_with_user(self.target, inter.guild.id, select_value)
 
         formated_reason = ''.join(query[2])
 
@@ -211,7 +209,7 @@ class ShowCaseInfo_Open(nc.ui.View):
 
     @nc.ui.button(label="Edit Case", style=nc.ButtonStyle.green, row=1, disabled=False)
     async def edit_case(self, button: nc.ui.Button, inter: nc.Interaction):
-        query = BotDB().query_case_with_user(self.target, inter.guild.id, self.case_id)
+        query = await inter.client.db.query_case_with_user(self.target, inter.guild.id, self.case_id)
         formated_reason = ''.join(query[2])
         view = EditCaseModal(query[0], query[1], formated_reason, query[3], query[4], query[5], self.target, self.case_id, query[6])
         button.disabled = True
@@ -219,7 +217,7 @@ class ShowCaseInfo_Open(nc.ui.View):
 
     @nc.ui.button(label="Close Case", style=nc.ButtonStyle.red, row=1, disabled=False)
     async def close_case(self, button: nc.ui.Button, inter: nc.Interaction):
-        query = BotDB().query_case_with_user(self.target, inter.guild.id, self.case_id)
+        query = await inter.client.db.query_case_with_user(self.target, inter.guild.id, self.case_id)
         formated_reason = ''.join(query[2])
 
         info_e = nc.Embed(title=f"{query[5]}: {self.case_id} (CLOSED)", description=f"Case opened by: {query[0]} at {query[1]}", colour=config.red)
@@ -227,14 +225,14 @@ class ShowCaseInfo_Open(nc.ui.View):
         info_e.add_field(name="Case History", value=query[4])
         info_e.add_field(name="Case Status", value=f"Closed by {inter.user} at {config.aktuelldatum}")
 
-        BotDB().update_case_status(f"Closed by {inter.user} at {config.aktuelldatum}", inter.guild.id, self.case_id)
+        await inter.client.db.update_case_status(f"Closed by {inter.user} at {config.aktuelldatum}", inter.guild.id, self.case_id)
         view = ShowCaseInfo_Closed(query[0], query[1], formated_reason, query[3], query[4], query[5], query[6], self.target, self.case_id)
         await inter.response.edit_message(embed=info_e, view=view)
 
 
     @nc.ui.button(label="Menu", style=nc.ButtonStyle.blurple, row=2, disabled=False)
     async def menu_case(self, button: nc.ui.Button, inter: nc.Interaction):
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         target = inter.guild.get_member(self.target)            
         if data is None:
             fail_m = Embed(title="No role found", description="Please add Perm Roles with the setup commands to use this command!", colour=config.red)
@@ -244,11 +242,11 @@ class ShowCaseInfo_Open(nc.ui.View):
         else:            
             if inter.user.get_role(data[1]):
 
-                cases = BotDB().query_all_case_ids(target.id, inter.guild.id)
+                cases = await inter.client.db.query_all_case_ids(target.id, inter.guild.id)
                 if cases:
                     options = []
                     for case in cases:
-                        query = BotDB().query_case_all(case[0], inter.guild.id)
+                        query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                         
                         if query[6].split()[0] == "Closed":
                         
@@ -296,7 +294,7 @@ class ShowCaseInfo_Closed(nc.ui.View):
 
     @nc.ui.button(label="Delete Case", style=nc.ButtonStyle.red, row=1, disabled=False)
     async def del_case(self, button: nc.ui.Button, inter: nc.Interaction):
-        guild_exists = BotDB().query_server_table(inter.guild.id)
+        guild_exists = await inter.client.db.query_server_table(inter.guild.id)
                     
         if guild_exists is None:
             fail_m = Embed(title="No role found", description="Please add Perm Roles with the setup commands to use this command!", colour=config.red)
@@ -304,20 +302,20 @@ class ShowCaseInfo_Closed(nc.ui.View):
             return False
 
         else:
-            admin_role = BotDB().query_server_table(inter.guild.id)
+            admin_role = await inter.client.db.query_server_table(inter.guild.id)
             
             if inter.user.get_role(admin_role[1]):
 
                 res = nc.Embed(title=f"Case {self.case_id} sucessfully deleted!", description="You will return to the Command before in 5 secounds!", colour=config.blurple)
                 await inter.response.edit_message(embed=res, view=None)
-                BotDB().delete_case(self.target, inter.guild.id, self.case_id)
+                await inter.client.db.delete_case(self.target, inter.guild.id, self.case_id)
                 await asyncio.sleep(5)
 
-                cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+                cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
                 if cases:
                     options = []
                     for case in cases:
-                        query = BotDB().query_case_all(case[0], inter.guild.id)
+                        query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                         
                         if query[6].split()[0] == "Closed":
                         
@@ -378,7 +376,7 @@ class EditCaseModal(nc.ui.Modal):
         else:
             old_changes = ''.join(self.changes)
             new_changes = f"{old_changes}\n\nModerator: {inter.user.id} | {inter.user.name}\n\n __Reason__\nOld: {self.reason}\nNew: {self.new_reason.value}\nDate: {current_time}"
-        BotDB().update_case(self.new_reason.value, new_changes, self.case_id, inter.guild.id)
+        await inter.client.db.update_case(self.new_reason.value, new_changes, self.case_id, inter.guild.id)
 
         
         e_updated = Embed(description="Case Overview", colour=config.blurple)
@@ -393,12 +391,12 @@ class EditCaseModal(nc.ui.Modal):
         next_label = self.button_next.label.split()[1]
         site = int(next_label) - 1
         if site == 1:
-            cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         else:
-            cases = BotDB().query_all_cases_via_case_id_with_offset(site, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(site, self.target, inter.guild.id)
         options = []
         for case in cases:
-            query = BotDB().query_case_reason_and_type(case[0], inter.guild.id)
+            query = await inter.client.db.query_case_reason_and_type(case[0], inter.guild.id)
             c_mod = inter.guild.get_member(query[0])
             new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
             options.append(new_option)
@@ -428,7 +426,7 @@ class CaseInfoDropdown(nc.ui.View):
     @nc.ui.button(label="Page Back", style=nc.ButtonStyle.blurple, row=1, disabled=True)
     async def page_back(self, button: nc.ui.Button, inter: nc.Interaction):
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -440,7 +438,7 @@ class CaseInfoDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 1
             button_back.label = f"Page {button_count}"
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
             button_next.disabled = False
             if offset_count == 0:
                 button_back.disabled = True
@@ -449,7 +447,7 @@ class CaseInfoDropdown(nc.ui.View):
                 button_back.disabled = False
             for case in cases:
                 button_next.label = f"Page {button_count + 1}"
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -462,7 +460,7 @@ class CaseInfoDropdown(nc.ui.View):
     async def next_page(self, button: nc.ui.Button, inter: nc.Interaction):
         button_count = int(button.label.split()[1]) if button.label else 1
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -474,8 +472,8 @@ class CaseInfoDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 2
             back_label = button_count - 1
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
-            next_cases_check = BotDB().query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            next_cases_check = await inter.client.db.query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
             button_back.disabled = False
             
             button_back.label = f"Page {back_label}"
@@ -486,7 +484,7 @@ class CaseInfoDropdown(nc.ui.View):
                 await inter.response.edit_message(view=self)
                 return
             for case in cases:
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -511,7 +509,7 @@ class SelctCaseInfo(nc.ui.Select):
     async def callback(self, inter: nc.Interaction):
         select_value = self.values[0].split()[1]
 
-        query = BotDB().query_case_with_user(self.target, inter.guild.id, select_value)
+        query = await inter.client.db.query_case_with_user(self.target, inter.guild.id, select_value)
         formated_reason = ''.join(query[2])
         if query[3] is None:
             formated_info = None
@@ -555,7 +553,7 @@ class DeleteCaseDropdown(nc.ui.View):
     @nc.ui.button(label="Page Back", style=nc.ButtonStyle.blurple, row=1, disabled=True)
     async def page_back(self, button: nc.ui.Button, inter: nc.Interaction):
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -567,7 +565,7 @@ class DeleteCaseDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 1
             button_back.label = f"Page {button_count}"
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
             button_next.disabled = False
             if offset_count == 0:
                 button_back.disabled = True
@@ -576,7 +574,7 @@ class DeleteCaseDropdown(nc.ui.View):
                 button_back.disabled = False
             for case in cases:
                 button_next.label = f"Page {button_count + 1}"
-                query = BotDB().query_case_reason_and_type(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_reason_and_type(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -589,7 +587,7 @@ class DeleteCaseDropdown(nc.ui.View):
     async def next_page(self, button: nc.ui.Button, inter: nc.Interaction):
         button_count = int(button.label.split()[1]) if button.label else 1
 
-        count_cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+        count_cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         count = 0
         button_back = self.children[0]
         button_next = self.children[1]
@@ -601,8 +599,8 @@ class DeleteCaseDropdown(nc.ui.View):
             options = []
             offset_count = button_count - 2
             back_label = button_count - 1
-            cases = BotDB().query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
-            next_cases_check = BotDB().query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(offset_count, self.target, inter.guild.id)
+            next_cases_check = await inter.client.db.query_all_cases_via_case_id_with_offset(back_label, self.target, inter.guild.id)
             button_back.disabled = False
             
             button_back.label = f"Page {back_label}"
@@ -613,7 +611,7 @@ class DeleteCaseDropdown(nc.ui.View):
                 await inter.response.edit_message(view=self)
                 return
             for case in cases:
-                query = BotDB().query_case_reason_and_type(case[0], inter.guild.id)
+                query = await inter.client.db.query_case_reason_and_type(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
                 options.append(new_option)
@@ -641,7 +639,7 @@ class SelectDelWarn(nc.ui.Select):
 
         for value in self.values:
             v = value.split()[1]
-            query = BotDB().query_case_all(v, inter.guild.id)
+            query = await inter.client.db.query_case_all(v, inter.guild.id)
             formated_reason = ''.join(query[2])
             out.add_field(name=f"{query[5]}: {v}", value=f"Reason: {formated_reason}\n\uFEFF")
             if query[3] is not None:
@@ -651,19 +649,19 @@ class SelectDelWarn(nc.ui.Select):
                 formated_history = ''.join(query[4])
                 out.add_field(name=f"Case History", value=f"{formated_history}\n\uFEFF")
             out.add_field(name=f"Case Opened at:", value=f"{query[1]}\n\uFEFF")
-            BotDB().delete_case(self.target, inter.guild.id, v)
+            await inter.client.db.delete_case(self.target, inter.guild.id, v)
         
         
         next_label = self.button_next.label.split()[1]
         site = int(next_label) - 1
         if site == 1:
-            cases = BotDB().query_all_case_ids(self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_case_ids(self.target, inter.guild.id)
         else:
-            cases = BotDB().query_all_cases_via_case_id_with_offset(site, self.target, inter.guild.id)
+            cases = await inter.client.db.query_all_cases_via_case_id_with_offset(site, self.target, inter.guild.id)
                     
         options = []
         for case in cases:
-            query = BotDB().query_case_all(case[0], inter.guild.id)
+            query = await inter.client.db.query_case_all(case[0], inter.guild.id)
             c_mod = inter.guild.get_member(query[0])
             new_option = nc.SelectOption(label=f"{query[5]}: {str(case[0])}", description=f"Case Opened by: {c_mod.name}\nReason: {query[2]}\n{query[3] if query[3] is not None else 'No Info'}")
             options.append(new_option)
@@ -745,7 +743,7 @@ class MT(nc.ui.Modal):
                 
                 await self.target.edit(timeout=deadline)
                 await inter.edit_original_message(embed=timeoutctx)
-                BotDB().insert_case(inter.guild.id, self.target.id, inter.user.id, config.aktuelldatum, formated_reason, f"Duration: {delta}\nExecution: Added", random_id, "Timeout", "Open")
+                await inter.client.db.insert_case(inter.guild.id, self.target.id, inter.user.id, config.aktuelldatum, formated_reason, f"Duration: {delta}\nExecution: Added", random_id, "Timeout", "Open")
             
             else:
                 embed = nc.Embed(description=f"{config.a_cross} The member **{self.target}** could not be put into the timeout because the specified time was more than **28 days**.")

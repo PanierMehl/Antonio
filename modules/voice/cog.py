@@ -3,12 +3,9 @@ from nextcord import Embed, Interaction, File, FFmpegPCMAudio, SlashOption, Loca
 from nextcord.ext import commands
 import tempfile
 import config
-from mysql_class import BotDB
-import io
+from mysql_asyncmy import A_DB
 import asyncio
 from gtts import gTTS
-import yaml
-from modules.voice.view import RadioDropdown
 
 
         
@@ -125,7 +122,7 @@ class Voice(commands.Cog, name="Voice Commands"):
                           Locale.en_US: "The bot joins your voice channel"
                       })
     async def voice_join(self, inter: Interaction):
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await self.bot.db.query_server_table(inter.guild.id)
 
         re_cannot_join = Embed(title=self.trans["commands"]["voice_join"]["re_cannot_join"]["title"][f"{inter.locale}"],
                                description=self.trans["commands"]["voice_join"]["re_cannot_join"]["description"][f"{inter.locale}"], colour=config.red)
@@ -254,7 +251,6 @@ class Voice(commands.Cog, name="Voice Commands"):
         
         if inter.user.voice:
             if inter.user.voice.channel.id == inter.guild.me.voice.channel.id:
-                data = BotDB().query_server_table(inter.guild.id)
 
                 await inter.response.defer(ephemeral=True)
                 await inter.guild.voice_client.disconnect()

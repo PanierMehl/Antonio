@@ -1,12 +1,11 @@
 import nextcord
-from nextcord import Embed, Interaction, File, FFmpegPCMAudio, SlashOption, Member
+from nextcord import Interaction, SlashOption, Member
 from nextcord.ext import commands
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 import perms_check
 
-import asyncio
 
 class LevelSystem(commands.Cog, name="Level Commands"):
     """Contains all level commands"""
@@ -24,7 +23,7 @@ class LevelSystem(commands.Cog, name="Level Commands"):
     @level.subcommand(name="show")
     @perms_check.has_min_moderator_perm_role()
     async def level_show(self, inter: Interaction, member: Member = SlashOption(name="member")):
-        check = BotDB().level_query(member.id, inter.guild.id)
+        check = await self.bot.db.level_query(member.id, inter.guild.id)
         
         if check == None:
             await inter.response.send_message(content="None", ephemeral=True)

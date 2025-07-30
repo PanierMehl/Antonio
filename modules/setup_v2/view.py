@@ -1,10 +1,9 @@
-import aiosqlite
 import nextcord
 from nextcord import Interaction
 from nextcord.ext.commands import Context
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
   
 #################################################################################################################                  
@@ -38,7 +37,7 @@ class global_text_select_channels(nextcord.ui.View):
         for channel in channels:
             pass
                         
-        BotDB().update_global_channel(channel.id, inter.guild.id)
+        await inter.client.db.update_global_channel(channel.id, inter.guild.id)
         eb = self.children[0]
         eb.disabled = True
         eb.placeholder = f"You selected #{channel.name}"
@@ -60,7 +59,7 @@ class global_del_view(nextcord.ui.View):
         super().__init__(timeout=timeout)  
 
     async def unset_global_channel(self, inter: nextcord.Interaction):
-        BotDB().update_global_channel(None, inter.guild.id)  
+        await inter.client.db.update_global_channel(None, inter.guild.id)  
 
 
 #################################################################################################################                  
@@ -90,14 +89,14 @@ class language_select_view(nextcord.ui.View):
         
         selected_option = select.values[0]
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_language(inter.guild.id, selected_option)
+            await inter.client.db.insert_language(inter.guild.id, selected_option)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_language(selected_option, inter.guild.id)
+                await inter.client.db.update_language(selected_option, inter.guild.id)
         
         check_mark_maja_png = nextcord.File("pictures/check_mark_maja.png", filename="check_mark_maja.png")
         reply = nextcord.Embed(title="Language has been set", description=f"Your language is now \n"f"{selected_option}", colour=config.blurple)
@@ -116,4 +115,4 @@ class language_del_view(nextcord.ui.View):
         super().__init__(timeout=timeout)  
 
     async def unset_language(self, inter: nextcord.Interaction):
-        BotDB().update_language(None, inter.guild.id)
+        await inter.client.db.update_language(None, inter.guild.id)

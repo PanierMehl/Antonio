@@ -1,8 +1,7 @@
 import nextcord
-from nextcord import SlashOption, Embed, Interaction, Locale, File
+from nextcord import Embed, Interaction, Locale, File
 from nextcord.ext import commands
 
-import aiosqlite 
 import asyncio
 import yaml
 
@@ -19,7 +18,7 @@ from modules.setup_v2.view_v2 import (universal_setup_remove,
                                       language_add)
 
 import perms_check
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 import config
 from config import red
 
@@ -80,7 +79,7 @@ class Setup(commands.Cog, name="Setup"):
 
     async def get_status_embed(self, inter: Interaction):    
  
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await self.bot.db.query_server_table(inter.guild.id)
 
         if data is None:
             admin_role = None
@@ -132,7 +131,7 @@ class Setup(commands.Cog, name="Setup"):
             await inter.response.defer(ephemeral=True)
             org = await inter.original_message()
 
-            data = BotDB().query_server_table(inter.guild.id)
+            data = await self.bot.db.query_server_table(inter.guild.id)
 
             if data is None:
                 admin_role = None
@@ -313,11 +312,11 @@ class Setup(commands.Cog, name="Setup"):
         await inter.response.defer(ephemeral=True)
 
         #Check if Guild ID already used
-        data_check = BotDB().query_server_table(inter.guild.id)
+        data_check = await self.bot.db.query_server_table(inter.guild.id)
 
         #If the guild id is in use
         if data_check[0]:
-            data_channel = BotDB().query_custom_one_slot(s_input, "server", inter.guild.id)
+            data_channel = await self.bot.db.query_custom_one_slot(s_input, "server", inter.guild.id)
             
             #If global_channel already set test
             if data_channel[0]:
@@ -359,10 +358,10 @@ class Setup(commands.Cog, name="Setup"):
         await inter.response.defer(ephemeral=True)
 
         #Check if Guild ID already used
-        data_check = BotDB().query_server_table(inter.guild.id)
+        data_check = await self.bot.db.query_server_table(inter.guild.id)
         #If the guild id is in use
         if data_check is not None:
-            data_role = BotDB().query_custom_one_slot(s_input, "setup", inter.guild.id)
+            data_role = await self.bot.db.query_custom_one_slot(s_input, "setup", inter.guild.id)
             
             #If admin_role already set test
             if data_role is not None:
@@ -406,11 +405,11 @@ class Setup(commands.Cog, name="Setup"):
         await inter.response.defer(ephemeral=True)
 
         #Check if Guild ID already used
-        data_check = BotDB().query_server_table(inter.guild.id)
+        data_check = await self.bot.db.query_server_table(inter.guild.id)
 
         #If the guild id is in use
         if data_check is not None:
-            data_role = BotDB().query_custom_one_slot(s_input, "setup", inter.guild.id)
+            data_role = await self.bot.db.query_custom_one_slot(s_input, "setup", inter.guild.id)
             
             #If moderator_role already set test
             if data_role is not None:
@@ -454,11 +453,11 @@ class Setup(commands.Cog, name="Setup"):
         await inter.response.defer(ephemeral=True)
 
         #Check if Guild ID already used
-        data_check = BotDB().query_server_table(inter.guild.id)
+        data_check = await self.bot.db.query_server_table(inter.guild.id)
 
         #If the guild id is in use
         if data_check is not None:
-            data_role = BotDB().query_custom_one_slot(s_input, "setup", inter.guild.id)
+            data_role = await self.bot.db.query_custom_one_slot(s_input, "setup", inter.guild.id)
             
             #If supporter_role already set test
             if data_role is not None:
@@ -504,11 +503,11 @@ class Setup(commands.Cog, name="Setup"):
         await inter.response.defer()
 
         #Check if Guild ID already used
-        data_check = BotDB().query_server_table(inter.guild.id)
+        data_check = await self.bot.db.query_server_table(inter.guild.id)
 
         #If the guild id is in use
         if data_check is not None:
-            data_language = BotDB().query_custom_one_slot(s_input, "setup", inter.guild.id)
+            data_language = await self.bot.db.query_custom_one_slot(s_input, "setup", inter.guild.id)
             
             #If language already set test
             if data_language is not None:

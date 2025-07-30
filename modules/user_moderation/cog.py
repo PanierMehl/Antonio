@@ -12,7 +12,7 @@ import perms_check
 from modules.user_moderation.view import (MT, CaseInfoDropdown,
                                           DeleteCaseDropdown, EditCaseDropdown,
                                           NewWarnModal)
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -263,14 +263,14 @@ class Member_Moderation(commands.Cog, name="Member Moderation"):
             case "microphone":
                 try:
                     await member.edit(mute=True)
-                    BotDB().insert_case(inter.guild.id, member.id, inter.user.id, current_time, reason, None, random_id, "Mute", "Open")
+                    await self.bot.db.insert_case(inter.guild.id, member.id, inter.user.id, current_time, reason, None, random_id, "Mute", "Open")
                     await inter.edit_original_message(embed=case_a)
                 except:
                     await inter.edit_original_message(embed=err)
 
             case "microphone and headset":
                 try:
-                    BotDB().insert_case(inter.guild.id, member.id, inter.user.id, current_time, reason, None, random_id, "Fullmute", "Open")
+                    await self.bot.db.insert_case(inter.guild.id, member.id, inter.user.id, current_time, reason, None, random_id, "Fullmute", "Open")
                     await inter.edit_original_message(embed=case_b)
                 except:
                     await inter.edit_original_message(embed=err)
@@ -299,11 +299,11 @@ class Member_Moderation(commands.Cog, name="Member Moderation"):
     async def history_info(self, inter: Interaction,
                             member: nc.Member = SlashOption(name="member", description="Please select a member", required=True,
                                                             description_localizations={Locale.en_US: "Please select a member", Locale.de: "Bitte wähle ein Mitglied"})):
-        cases = BotDB().query_all_case_ids(member.id, inter.guild.id)
+        cases = await self.bot.db.query_all_case_ids(member.id, inter.guild.id)
         if cases:
             options = []
             for case in cases:
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await self.bot.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 
                 if inter.locale == "de":
@@ -350,11 +350,11 @@ class Member_Moderation(commands.Cog, name="Member Moderation"):
                             member: nc.Member = SlashOption(name="member", description="Please select a member", required=True,
                                                             description_localizations={Locale.en_US: "Please select a member", Locale.de: "Bitte wähle ein Mitglied"})):
             
-        cases = BotDB().query_all_case_ids(member.id, inter.guild.id)
+        cases = await self.bot.db.query_all_case_ids(member.id, inter.guild.id)
         if cases:
             options = []
             for case in cases:
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await self.bot.db.query_case_all(case[0], inter.guild.id)
                 
                 if query[6].split()[0] == "Closed":
                 
@@ -418,12 +418,12 @@ class Member_Moderation(commands.Cog, name="Member Moderation"):
     async def history_delete(self, inter: Interaction, member: nc.Member = SlashOption(name="member", description="Please select a member", required=True,
                                                                                        description_localizations={Locale.en_US: "Please select a member", Locale.de: "Bitte wähle ein Mitglied"})):
 
-        cases = BotDB().query_all_case_ids(member.id, inter.guild.id)
+        cases = await self.bot.db.query_all_case_ids(member.id, inter.guild.id)
         
         if cases:
             options = []
             for case in cases:
-                query = BotDB().query_case_all(case[0], inter.guild.id)
+                query = await self.bot.db.query_case_all(case[0], inter.guild.id)
                 c_mod = inter.guild.get_member(query[0])
                 
                 if inter.locale == "de":

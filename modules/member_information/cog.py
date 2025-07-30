@@ -10,7 +10,7 @@ from nextcord.ext.commands.cooldowns import BucketType
 from modules.member_information.views import mi_home
 
 import config
-from mysql_class import BotDB
+
 
 import aiosqlite
 import yaml

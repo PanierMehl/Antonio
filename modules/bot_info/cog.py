@@ -7,7 +7,7 @@ from nextcord import SlashOption, Embed, NotFound, File, Interaction, Locale
 from nextcord.ext import commands
 
 import config
-from mysql_class import BotDB
+
 
 import aiosqlite
 import yaml

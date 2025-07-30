@@ -8,7 +8,7 @@ from nextcord.ext import commands
 from modules.admin.view import giveaway_selected_roles_de, giveaway_selected_roles_en, giveaway_create_de, giveaway_create_en, giveaway_selected_user_de, giveaway_selected_user_en
 import config
 import perms_check
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 import json
 import random
 
@@ -116,17 +116,17 @@ class Admin(commands.Cog, name="Administrator"):
                               giveaway_id: str = SlashOption(name="giveaway_id", description="Please enter the giveaway ID here for the giveaway that should be redrawn.",
                                                              description_localizations={Locale.de: "Gebe die Gewinnspiel ID hier an, vom Giveaway, welches neu ausgelost werden soll.",
                                                                                  Locale.en_US: "Please enter the giveaway ID here for the giveaway that should be redrawn."})):
-        query = BotDB().query_giveaway_data(giveaway_id)
+        query = await self.bot.db.query_giveaway_data(giveaway_id)
         if query is None:
             return
         else:
             channel = inter.guild.get_channel(query[2])
             message = await channel.fetch_message(query[0])
             
-            server_query = BotDB().query_server_table(inter.guild.id)
+            server_query = await self.bot.db.query_server_table(inter.guild.id)
             
             participants_data = query[1]
-            winners_tuple = BotDB().determine_winners(giveaway_id)
+            winners_tuple = await self.bot.db.determine_winners(giveaway_id)
             winners_str = winners_tuple[0]
             num_winners = winners_tuple[1]
 
@@ -178,6 +178,28 @@ class Admin(commands.Cog, name="Administrator"):
                 await inter.response.send_message(content=f"{winner_mentions} was drawn as the new winnerway. Congratulations.")
             
 
+    @nextcord.slash_command(name="test")
+    async def test_c(self, inter: Interaction):
+        pass
+    
+    @test_c.subcommand(name="server_table")
+    async def query_db(self, inter: Interaction):
+        print("a")
+        await inter.response.defer()
+        t = await self.bot.db.query_server_table(inter.guild.id)
+        print(t)
+        await inter.edit_original_message(content=t)
 
+    @test_c.subcommand(name="send_a")
+    async def send_a(self, inter: Interaction):
+        print("a")
+        await inter.response.send_message("A")
+        
+    @test_c.subcommand(name="send_ping")
+    async def send_ping(self, inter: Interaction):
+        print("a")
+        await inter.response.send_message(inter.client.latency * 1000)
+        
+              
 def setup(bot: commands.Bot):
     bot.add_cog(Admin(bot))

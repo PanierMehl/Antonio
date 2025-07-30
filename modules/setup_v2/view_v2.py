@@ -1,11 +1,8 @@
 import nextcord
 from nextcord import Embed, Interaction
-from nextcord.ext.commands import Context
-
-import aiosqlite
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 
 
 class universal_setup_remove(nextcord.ui.View):
@@ -53,7 +50,7 @@ class universal_setup_remove(nextcord.ui.View):
         elif self.s_input == "global_channel":
             s_object = "Global Chat"
 
-        BotDB().update_custom_one_slot("server", self.s_input, None, inter.guild.id)
+        await inter.client.db.update_custom_one_slot("server", self.s_input, None, inter.guild.id)
 
         check_mark_maja_png = nextcord.File("pictures/check_mark_maja.png", filename="check_mark_maja.png")
 
@@ -91,14 +88,14 @@ class language_add(nextcord.ui.View):
         
         selected_option = select.values[0]
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_language(inter.guild.id, selected_option)
+            await inter.client.db.insert_language(inter.guild.id, selected_option)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_language(selected_option, inter.guild.id)
+                await inter.client.db.update_language(selected_option, inter.guild.id)
         
         check_mark_maja_png = nextcord.File("pictures/check_mark_maja.png", filename="check_mark_maja.png")
         reply = nextcord.Embed(title="Language has been set", description=f"Your language is now \n"f"{selected_option}", colour=config.dark_green)
@@ -144,14 +141,14 @@ class universal_role_select(nextcord.ui.View):
         for role in roles:
             pass
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_custom_one_slot("setup", s_object, inter.guild.id, role.id)
+            await inter.client.db.insert_custom_one_slot("setup", s_object, inter.guild.id, role.id)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_custom_one_slot("setup", s_object, role.id, inter.guild.id)
+                await inter.client.db.update_custom_one_slot("setup", s_object, role.id, inter.guild.id)
         
 
         sel = self.children[0]
@@ -196,14 +193,14 @@ class universal_channel_select(nextcord.ui.View):
             s_object = "global_channel"
             name = "Global Chat"
 
-        data = BotDB().query_server_table(inter.guild.id)
+        data = await inter.client.db.query_server_table(inter.guild.id)
         
         if data is None:
-            BotDB().insert_custom_one_slot("server", s_object, inter.guild.id, channel.id)
+            await inter.client.db.insert_custom_one_slot("server", s_object, inter.guild.id, channel.id)
             
         if data is not None:
             if inter.guild.id in data:
-                BotDB().update_custom_one_slot("server", s_object, channel.id, inter.guild.id)
+                await inter.client.db.update_custom_one_slot("server", s_object, channel.id, inter.guild.id)
     
         sel = self.children[0]
         but = self.children[1]

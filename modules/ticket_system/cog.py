@@ -1,9 +1,9 @@
 import nextcord
-from nextcord import Embed, File, Interaction, Locale
+from nextcord import Embed, Interaction, Locale
 from nextcord.ext import commands
 
 import config
-from mysql_class import BotDB
+from mysql_asyncmy import A_DB
 from modules.ticket_system.view import SetupTicket_en, SetupTicket_de, TicketSystem_Del_de, TicketSystem_Del_en
 
 import yaml
@@ -32,7 +32,7 @@ class Ticket_System(commands.Cog, name="Ticket System"):
     async def ticket_setup(self, inter: Interaction):
 
         
-        check = BotDB().query_ticket_system(inter.guild_id)
+        check = await self.bot.db.query_ticket_system(inter.guild_id)
         
         if check is None:
             if inter.locale == "de":
