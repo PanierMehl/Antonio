@@ -1,4 +1,4 @@
-import nextcord
+'''import nextcord
 from nextcord import Interaction, SlashOption, Member
 from nextcord.ext import commands
 
@@ -37,4 +37,4 @@ class LevelSystem(commands.Cog, name="Level Commands"):
 def setup(bot: commands.Bot):
 
     bot.add_cog(LevelSystem(bot))
-        
+        '''

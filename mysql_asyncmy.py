@@ -493,7 +493,7 @@ class A_DB:
     #----------------------------------------------------------------------------------------------------------------#
 
     async def get_giveaway_ending(self):
-        query = ('SELECT time, message, guild_id, channel_id, giveaway_id, prize, participants, finished FROM giveaway')
+        query = ('SELECT time, message, guild_id, channel_id, giveaway_id, prize, participants, winners, finished FROM giveaway')
         return await self._execute(query, fetch="all")
     
     #----------------------------------------------------------------------------------------------------------------#

@@ -26,37 +26,45 @@ class BotInfo(commands.Cog, name="Bot Informations"):
     
     #############################################################################################################
 
-    #Statistik_Command (V4.1)
-    @nextcord.slash_command(name="bot-statistics", description="Shows you various statistics!",
+    # Version 6 | Bot Statistics Command
+    @nextcord.slash_command(name="bot-statistics",
+                            description="Shows you various statistics!",
                             name_localizations={Locale.de: "bot-statistik", Locale.en_US: "bot-statistics"},
-                            description_localizations={Locale.de: "Zeigt verschiedene Statistiken zum Bot an!", Locale.en_US: "Displays various statistics about the bot!"})        
+                            description_localizations={Locale.de: "Zeigt verschiedene Statistiken zum Bot an!",
+                                                       Locale.en_US: "Displays various statistics about the bot!"})        
     @cooldowns.cooldown(1, 30, bucket=cooldowns.SlashBucket.guild)
-    async def stats(self, interaction: Interaction):
+    async def stats(self, inter: Interaction):
 
-        await interaction.response.defer(ephemeral=True)
-        servercount = len(interaction.client.guilds)
-        membercount = len(set(interaction.client.get_all_members()))
-        channelcount = len(set(interaction.client.get_all_channels()))
+        await inter.response.defer(ephemeral=True)
+        servercount = len(inter.client.guilds)
+        membercount = len(set(inter.client.get_all_members()))
+        channelcount = len(set(inter.client.get_all_channels()))
         
         information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
         information_icon_url = "attachment://information-icon.png"
 
-        info_embed = Embed(title=self.trans["commands"]["stats"]["info_embed"]["title"][interaction.locale], 
-                           description=self.trans["commands"]["stats"]["info_embed"]["description"][interaction.locale].format(servercount=servercount, membercount=membercount, channelcount=channelcount), colour=config.old_blurple)
+        info_embed = Embed(title=self.trans["commands"]["stats"]["info_embed"]["title"][inter.locale], 
+                           description=self.trans["commands"]["stats"]["info_embed"]["description"][inter.locale].format(servercount=servercount,
+                                                                                                                         membercount=membercount,
+                                                                                                                         channelcount=channelcount),
+                           colour=config.old_blurple)
+        
         info_embed.set_thumbnail(url=information_icon_url)
 
-        await interaction.edit_original_message(embed=info_embed, file=information_icon_png)
+        await inter.edit_original_message(embed=info_embed, file=information_icon_png)
         
-    #############################################################################################################
+    #------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-    #Ping_Command (V5.1)
-    @nextcord.slash_command(name="ping", description="Checks for a response from the bot",
+    #Version 6 | Ping Command 
+    @nextcord.slash_command(name="ping",
+                            description="Checks for a response from the bot",
                             description_localizations={Locale.de: "Prüft auf eine Antwort vom Bot", Locale.en_US: "Checks for a response from the bot"})
     
     async def ping(self, interaction: Interaction):
         latency = int(round(interaction.client.latency * 1000))
         p = ""
         c = ""
+        
         if latency < 150:
             p = self.trans["commands"]["ping"]["p"]["e"][interaction.locale]
             c = config.green
@@ -75,11 +83,8 @@ class BotInfo(commands.Cog, name="Bot Informations"):
         r = Embed(title=self.trans["commands"]["ping"]["r"]["title"][interaction.locale], description=f"**{p}**:  {latency}ms", colour=c)
         r.set_thumbnail(url=information_icon_url)
         await interaction.response.send_message(embed=r, file=information_icon_png, ephemeral=True)
+    
+    #------------------------------------------------------------------------------------------------------------------------------------------------------------------#                           
 
-    #############################################################################################################
-
-
-    #############################################################################################################
-                                   
 def setup(bot: commands.Bot):
     bot.add_cog(BotInfo(bot))

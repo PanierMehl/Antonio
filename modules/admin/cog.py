@@ -32,16 +32,20 @@ class Admin(commands.Cog, name="Administrator"):
 ########################################################################################################################################
 
     #DeleteAllInvites-Slash
-        #v1 / No Issues
         
-    @nextcord.slash_command(name="delete", name_localizations={Locale.de: "entferne", Locale.en_US: "deletw"})
+    # Version 6 | Delete Command 
+    @nextcord.slash_command(name="delete", name_localizations={Locale.de: "entfernen", Locale.en_US: "delete"})
     @perms_check.has_admin_perm_role()
     async def delete(self, inter: Interaction):
         pass
     
-    @delete.subcommand(name="perma-invites", description="Removes all invites from your server without an expiry time",
-                            name_localizations={Locale.de: "permanente-einladungen", Locale.en_US: "perma-invites"}, 
-                            description_localizations={Locale.de: "Entfernt alle permanenten Einladungen", Locale.en_US: "Removes all permanent invites"})
+    
+    # Version 6 | Perma Invites Command
+    @delete.subcommand(name="perma-invites",
+                       description="Removes all invites from your server without an expiry time",
+                       name_localizations={Locale.de: "permanente-einladungen", Locale.en_US: "perma-invites"}, 
+                       description_localizations={Locale.de: "Entfernt alle Einladungen vom Server ohne Ablaufdatum.", Locale.en_US: "Removes all permanent invites"})
+    @perms_check.has_admin_perm_role()
     async def delete_all_invites(self, inter: Interaction):
         
         if inter.user == inter.guild.owner:
@@ -55,28 +59,39 @@ class Admin(commands.Cog, name="Administrator"):
                     await d.delete()
                     await asyncio.sleep(1)
                 deleted_invites.append(d)
-            await inter.edit_original_message(embed=Embed(title=self.trans["commands"]["delete_all_invites"]["d_loop"]["title"][inter.locale].format(invites=len(deleted_invites)), 
-                                                                            description='\n'.join([f'{config.a_tic} `{di.code}` by {di.inviter} ({di.uses})' for di in deleted_invites])))
+            await inter.edit_original_message(embed=Embed
+                                              (title=self.trans["commands"]["delete_all_invites"]["d_loop"]["title"][inter.locale].format(invites=len(deleted_invites)), 
+                                               description='\n'.join([f'{config.a_tic} `{di.code}` by {di.inviter} ({di.uses})' for di in deleted_invites])))
 
-  
+
+    #------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+    
+    # Version 6 | Giveaway Command
     @nextcord.slash_command(name="giveaway", name_localizations={Locale.de: "gewinnspiel", Locale.en_US: "giveaway"})
+    @perms_check.has_admin_perm_role()
     async def giveaway(self, inter: Interaction):
         pass
  
-
-    @giveaway.subcommand(name="create", description="Create a giveaway",
+ 
+    # Version 6 | Giveaway Create Command
+    @giveaway.subcommand(name="create",
+                         description="Create a giveaway",
                          name_localizations={Locale.de: "erstellen", Locale.en_US: "create"},
-                         description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})  
+                         description_localizations={Locale.de: "Erstelle eine Gewinnspiel", Locale.en_US: "Create a giveaway"})
+    @perms_check.has_admin_perm_role()
     async def giveaway_create(self, inter: Interaction,
-                              channel: nextcord.abc.GuildChannel = SlashOption(channel_types=[nextcord.ChannelType.text], description="What channel should the giveaway be in?", required=True,
+                              channel: nextcord.abc.GuildChannel = SlashOption(channel_types=[nextcord.ChannelType.text],
+                                                                               description="What channel should the giveaway be in?",
+                                                                               required=True,
                                                                                name_localizations={Locale.de: "kanal", Locale.en_US: "channel"},
                                                                                description_localizations={Locale.de:"In welchen Kanal soll die Gewinnspiel statt finden?", Locale.en_US: "What channel should the giveaway be in?"}),
+                              
                               entiled: str = SlashOption(name_localizations={Locale.de: "teilnahmevorraussetzung", Locale.en_US: "entiled"},
                                                          description_localizations={Locale.de: "Wer darf an diesem Gewinnspiel teilnehmen?",
                                                                                     Locale.en_US: "Who is allowed to participate in this GiveAWay?"},
                                                          choices=["roles", "user"], choice_localizations={"roles":{Locale.de: "rolle", Locale.en_US: "role"},
-                                                                                                          "user": {Locale.de: "mitglied", Locale.en_US: "member"}}, required=False)):
-        print("HELLO")
+                                                                                                          "user": {Locale.de: "mitglied", Locale.en_US: "member"}},
+                                                         required=False)):
         
         if entiled is None:
             if inter.locale == "de":
@@ -96,6 +111,7 @@ class Admin(commands.Cog, name="Administrator"):
             else:
                 await inter.edit_original_message(view=giveaway_selected_roles_en(channel))
         
+        
         elif entiled == "user":
             await inter.response.defer(ephemeral=True)
             if inter.locale == "de":
@@ -107,15 +123,21 @@ class Admin(commands.Cog, name="Administrator"):
             else:
                 await inter.edit_original_message(view=giveaway_selected_user_en(channel))
     
-
-        
-    @giveaway.subcommand(name="reroll", description="Reroll a Giveaway with the giveaway id",
+    
+    # Version 6 | Giveaway Reroll Command 
+    @giveaway.subcommand(name="reroll",
+                         description="Reroll a Giveaway with the giveaway id",
                          name_localizations={Locale.de: "neuauslosung", Locale.en_US: "reroll"},
                          description_localizations={Locale.de: "Lose ein Gewinnspiel neu aus!", Locale.en_US: "Reroll a Giveaway with the giveaway id"})
+    @perms_check.has_admin_perm_role()
     async def giveaway_reroll(self, inter: Interaction,
-                              giveaway_id: str = SlashOption(name="giveaway_id", description="Please enter the giveaway ID here for the giveaway that should be redrawn.",
-                                                             description_localizations={Locale.de: "Gebe die Gewinnspiel ID hier an, vom Giveaway, welches neu ausgelost werden soll.",
-                                                                                 Locale.en_US: "Please enter the giveaway ID here for the giveaway that should be redrawn."})):
+                              giveaway_id: str = SlashOption(
+                                  name="giveaway_id", 
+                                  name_localizations={Locale.de: "gewinnspiel_id", Locale.en_US: "giveaway_id"},
+                                  description="Please enter the giveaway ID here for the giveaway that should be redrawn.",
+                                  description_localizations={Locale.de: "Gebe die Gewinnspiel ID hier an, vom Giveaway, welches neu ausgelost werden soll.",
+                                                             Locale.en_US: "Please enter the giveaway ID here for the giveaway that should be redrawn."})):
+        
         query = await self.bot.db.query_giveaway_data(giveaway_id)
         if query is None:
             return
@@ -149,57 +171,31 @@ class Admin(commands.Cog, name="Administrator"):
             
                                 
             if server_query[5] == "Engish":
-                embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
-                embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
-                embed.add_field(name="Prize", value=f"{query[3]}\n\uFEFF")
-                embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
-                embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
-                await message.edit(embed=embed, view=None)
-                
-                await inter.response.send_message(content=f"{winner_mentions} was drawn as the new winner for the prize `{query[3]}` from giveaway `{giveaway_id}`. Congratulations.")
-                
+                tl = "de"
             elif server_query[5] == "German":
-                embed = nextcord.Embed(title="🎉 Gewinnspiel beendet 🎉", description="Das Gewinnspiel ist beendet, eine weitere Teilnahme ist nicht möglich!", colour=config.red)
-                embed.add_field(name="Gewinner", value=f"{winner_mentions}\n\uFEFF")
-                embed.add_field(name="Preis", value=f"{query[3]}\n\uFEFF")
-                embed.add_field(name="Teilnehmer", value=f"{len(participants)}\n\uFEFF")
-                embed.set_footer(text=f"Gewinnspiel ID: {giveaway_id}")
-                await message.edit(embed=embed, view=None)
-                
-                await inter.response.send_message(content=f"{winner_mentions} wurde zum neuen Gewinner ausgelost für den Gewinn von `{query[3]}` aus dem Gewinnspiel `{giveaway_id}`. Glückwunsch.")
-                
+                tl = "en_US"
             else:
-                embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
-                embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
-                embed.add_field(name="Prize", value=f"{query[3]}\n\uFEFF")
-                embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
-                embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
-                await message.edit(embed=embed, view=None)
-                await inter.response.send_message(content=f"{winner_mentions} was drawn as the new winnerway. Congratulations.")
+                tl = "en_US"
             
-
-    @nextcord.slash_command(name="test")
-    async def test_c(self, inter: Interaction):
-        pass
-    
-    @test_c.subcommand(name="server_table")
-    async def query_db(self, inter: Interaction):
-        print("a")
-        await inter.response.defer()
-        t = await self.bot.db.query_server_table(inter.guild.id)
-        print(t)
-        await inter.edit_original_message(content=t)
-
-    @test_c.subcommand(name="send_a")
-    async def send_a(self, inter: Interaction):
-        print("a")
-        await inter.response.send_message("A")
-        
-    @test_c.subcommand(name="send_ping")
-    async def send_ping(self, inter: Interaction):
-        print("a")
-        await inter.response.send_message(inter.client.latency * 1000)
-        
+            e_ended = nextcord.Embed(title=self.trans["commands"]["giveaway_reroll"]["e_ended"]["title"][tl],
+                                   description=self.trans["commands"]["giveaway_reroll"]["e_ended"]["description"][tl],
+                                   colour=config.red)
+            e_ended.add_field(name=self.trans["commands"]["giveaway_reroll"]["e_ended"]["field_1"]["name"][tl],
+                            value=f"{winner_mentions}\n\uFEFF")
+            e_ended.add_field(name=self.trans["commands"]["giveaway_reroll"]["e_ended"]["field_2"]["name"][tl],
+                            value=f"{query[3]}\n\uFEFF")
+            e_ended.add_field(name=self.trans["commands"]["giveaway_reroll"]["e_ended"]["field_3"]["name"][tl],
+                            value=f"{len(participants)}\n\uFEFF")
+            e_ended.set_footer(text=self.trans["commands"]["giveaway_reroll"]["e_ended"]["footer"]["text"][tl].format(giveaway_id = giveaway_id))
+            
+            await message.edit(embed=e_ended, view=None)
+            e_winner = nextcord.Embed(description=self.trans["commands"]["giveaway_reroll"]["e_winner"]["description"][tl].format(winner_mentions = winner_mentions,
+                                                                                                                                  query_a = query[3],
+                                                                                                                                  giveaway_id = giveaway_id),
+                                      colour=config.gold)
+            await inter.response.send_message(embed=e_winner)
+                
+      
               
 def setup(bot: commands.Bot):
     bot.add_cog(Admin(bot))

@@ -639,6 +639,276 @@ commands:
       description:
         de: Es ist in Ordnung. Ich habe den Befehl für dich storniert.
         en_US: It's okay. I canceled the command for you
+  
+  giveaway_reroll:
+
+    e_ended:
+      title:
+        de:
+        en_US: Giveaway ended 🎉
+      description:
+        de:
+        en_US: The giveaway has ended, no further participation is possible!
+
+      field_1:
+        name:
+          de:
+          en_US: "Winners"
+
+      field_2:
+        name:
+          de:
+          en_US: "Prize"
+      
+      field_3:
+        name:
+          de:
+          en_US: "Entries"
+
+      footer:
+        text:
+          de:
+          en_US: "Giveaway ID: {giveaway_id}"
+      
+      e_winner:
+        description:
+          de:
+          en_US: "{winner_mentions} was drawn as the new winner for the prize `{query_a}` from giveaway `{giveaway_id}`. Congratulations."
+
+
+  channel_info:
+
+    e_cs:
+      title:
+        de: "Statistiken für:   {emoji} **{channel_name}**"
+        en_US: "Statistics for:   {emoji} **{channel_name}**"
+      description:
+        part_a:
+          de: 
+          en_US: "Category:"
+        part_b:
+          de:
+          en_US: "This channel is not in any category!"
+
+      field_1:
+        name:
+          de: "__**Allgemein**__"
+          en_US: "__**General**__"
+        value:
+          de: f"> **Kanal-Name:** {channel_name}\n"
+                f"> **Kanal-Erwähnung:** {channel_jump_url}\n"
+                f"> **Kanal-ID:** `{channel_id}`\n\n"
+                f"> **Kategorie:** {channel_category}\n"                          
+                f"> **Kategorie-ID:** `{channel_category_id}`\n\n"
+                f"> **Thema:** {topic}\n\n"
+                f"> **Position:** {position}\n\uFEFF"
+
+          en_US: f"> **Channel-Name:** {channel_name}\n"
+                f"> **Channel-Mention:** {channel_jump_url}\n"
+                f"> **Channel-ID:** `{channel_id}`\n\n"
+                f"> **Category:** {channel_category}\n"                          
+                f"> **Category-ID:** `{channel_category_id}`\n\n"
+                f"> **Topic:** {topic}\n\n"
+                f"> **Position:** {position}\n\uFEFF"
+
+      field_2:
+        name:
+          de: "__**Kanaleinstellungen**__"
+          en_US: "__**Channel Settings**__"
+        value:
+          de: f"> **Slowmode:** {delay} Sekunden\n\n"
+              f"> **Standard-Auto-Archivierungsdauer:** {auto_archive_duration} Stunden\n"
+          en_US: f"> **Slowmode-Delay:** {delay} secounds\n\n"
+                f"> **Default-Auto-Archive-Duration:** {auto_archive_duration} hours\n"
+
+      field_3:
+        name:
+          de: "__**Kanalinformationen**__"
+          en_US: "__**Channel Informations**__"
+        value:
+          de: "> **Erstellt:**  {created_at}\n\n"
+          en_US: "> **Created:**  {created_at}\n\n"
+
+      field_4:
+        name:
+          de: 
+          en_US: 
+        value:
+          de: f"> **Stage-Name:** {channel_name}\n"
+              f"> **Stage-Erwähnung:** {channel_jump_url}\n"
+              f"> **Stage-ID:** `{channel_id}`\n\n"
+              f"> **Thema:** {topic}\n\n"
+              f"> **Kategorie:** {channel_category}\n" 
+              f"> **Kategorie-ID:** `{channel_category_id}`\n\n"
+              f"> **Position:** {position}\n\uFEFF"
+
+          en_US: f"> **Stage-Name:** {channel_name}\n"
+                f"> **Stage-Mention:** {channel_jump_url}\n"
+                f"> **Stage-ID:** `{channel_id}`\n\n"
+                f"> **Topic:** {topic'}\n\n"
+                f"> **Category:** {channel_category}\n" 
+                f"> **Category-ID:** `{channel_category_id}`\n\n"
+                f"> **Position:** {position}\n\uFEFF"
+
+      field_5:
+        name: 
+          de: "__**Stage-Kanal-Einstellungen**__"
+          en_US: "__**Stage Voice Settings**__"
+        value:
+          de: f"> **Bitrate:** {bitrate}\n\n"
+              f"> **Benutzerlimit:** {user_limit}\n\n"
+              f"> **Region:** {rtc_region}\n\n"
+              f"> **Video-Qualität-Modus:** {video_quality_mode}\n"
+
+          en_US: f"> **Bitrate:** {bitrate}\n\n"
+                f"> **User-Limit:** {user_limit}\n\n"
+                f"> **Region:** {rtc_region}\n\n"
+                f"> **Video-Quality-Mode:** {video_quality_mode}\n"
+
+      field_6:
+        name:
+          de: "__**Stage-Kanal-Informationen**__"
+          en_US: "__**Thread Informations**__"
+        value:
+          de: f"> **Erstellt:** <t:{created_at}:F>\n\n"
+          en_US: f"> **Created:** <t:{created_at}:F>\n\n"
+
+      field_7:
+        name:
+          de: "__**Allgemein**__"
+          en_US: "__**General**__"
+        value: 
+          de: f"> **Voice-Name:** {name}\n"
+              f"> **Voice-Mention:** {jump_url}\n"
+              f"> **Voice-ID:** `{channel_id}`\n\n"
+              f"> **Kategorie:** {category}\n" 
+              f"> **Kategorie-ID:** `{category_id}`\n\n"
+              f"> **Position:** {position}\n\uFEFF"
+
+          en_US: f"> **Voice-Name:** {name}\n"
+                f"> **Voice-Mention:** {jump_url}\n"
+                f"> **Voice-ID:** `{channel_id}`\n\n"
+                f"> **Category:** {category}\n" 
+                f"> **Category-ID:** `{category_id}`\n\n"
+                f"> **Position:** {position}\n\uFEFF"
+
+      field_8:
+        name:
+          de: "__**Sprachkanal-Einstellungen**__"
+          en_US: "__**Voice Settings**__"
+        value:
+          de: f"> **Bitrate:** {bitrate}\n\n"
+              f"> **Benutzerlimit:** {user_limit}\n\n"
+              f"> **Region:** {rtc_region}\n\n"
+              f"> **Video-Quality-Modus:** {video_quality_mode}\n"
+
+          en_US: f"> **Bitrate:** {bitrate}\n\n"
+                f"> **User-Limit:** {user_limit}\n\n"
+                f"> **Region:** {rtc_region}\n\n"
+                f"> **Video-Quality-Mode:** {video_quality_mode}\n"
+
+      field_9:
+        name:
+          de: "__**Voice-Informationen**__"
+          en_US: "__**Voice Informations**__"
+        value:
+          de: f"> **Erstellt:** <t:{created_at}:F>\n\n"
+          en_US: f"> **Created:** <t:{created_at}:F>\n\n"
+
+      field_10:
+        name:
+          de: "__**Allgemein**__"
+          en_US: "__**General**__"
+        value:
+          de: f"> **Thread-Name:** {name}\n"
+              f"> **Thread-Erwähnung:** {jump_url}\n"
+              f"> **Thread-ID:** `{cahnnel_id}`\n\n"
+              f"> **Originaler Kanal:** <#{parent_id}>\n"
+              f"> **Original-ID:** `{parent_id}`\n\n"
+              f"> **Thread-Besitzer:** <@{owner_id}>\n"
+              f"> **Thread-Besitzer-ID:** `{owner_id}`\n\uFEFF"
+
+          en_US: f"> **Thread-Name:** {name}\n"
+                f"> **Thread-Mention:** {jump_url}\n"
+                f"> **Thread-ID:** `{channel_id}`\n\n"
+                f"> **Original-Channel:** <#{parent_id}>\n"
+                f"> **Original-ID:** `{parent_id}`\n\n"
+                f"> **Thread-Owner:** <@{owner_id>\n"
+                f"> **Thread-Owner-ID:** `{owner_id}`\n\uFEFF"
+
+      field_11:
+        name:
+          de: "__**Thread-Einstellungen**__"
+          en_US: "__**Thread Settings**__"
+        value:
+          de: f"> **Slowmode:** {slowmode_delay}\n\n"
+              f"> **Auto-Archivierungsdauer:** {auto_archive_duration} hours\n\n"
+              f"> **Privat:** {emoji_a}\n\n"
+              f"> **NSFW:** {emoji_b}"
+
+          en_US: f"> **Slowmode-Delay:** {slowmode_delay}\n\n"
+                f"> **Auto-Archive-Duration:** {auto_archive_duration} hours\n\n"
+                f"> **Private:** {emoji_a}\n\n"
+                f"> **NSFW:** {emoji_b}"
+
+      field_12:
+        name:
+          de: "__**Thread-Informationen**__"
+          en_US: "__**Thread Informations**__"
+        value:
+          de: f"> **Erstellt:** <t:{create_timestamp}:F>\n\n"
+              f"> **Archived:** {emoji_a}\n"
+              f"> **letzte Archivierung:** {archive_timestamp}\n\n"
+              f"> **Geschlossen:** {emoji_b}\n\n"
+              f"> **Einladbar:** {emoji_c}\n\n"
+
+          en_US: f"> **Created:** <t:{create_timestamp}:F>\n\n"
+                f"> **Archived:** {emoji_a}\n"
+                f"> **Last Archive:** {archive_timestamp}\n\n"
+                f"> **Locked:** {emoji_b}\n\n"
+                f"> **Invitable:** {emoji_c}\n\n"
+
+      field_13:
+        name:
+          de: "__**Allgemein**__"
+          en_US: "__**General**__"
+        value:
+          de: f"> **Forum-Name:** {name}\n"
+              f"> **Forum-Erwähnung:** {jump_url}\n"
+              f"> **Forum-ID:** `{channel_id}`\n\n"
+              f"> **Thema:** {topic}\n\n"
+              f"> **Kategorie:** {category}\n"
+              f"> **Kategorie-ID:** `{category_id}`\n\n"
+              f"> **Position:** {position}\n\uFEFF"
+              
+          en_US: f"> **Forum-Name:** {name}\n"
+                f"> **Forum-Mention:** {jump_url}\n"
+                f"> **Forum-ID:** `{channel_id}`\n\n"
+                f"> **Topic:** {topic}\n\n"
+                f"> **Category:** {category}\n"
+                f"> **Category-ID:** `{category_id}`\n\n"
+                f"> **Position:** {position}\n\uFEFF"
+
+      field_14:
+        name:
+          de: "__**Forum-Kanal-Einstellungen**__"
+          en_US: "__**Forum Channel Settings**__"
+        value:
+          de: f"> **Slowmode:** {slowmode_delay}\n"
+              f"> **Standard-Auto-Archivierungsdauer:** {default_auto_archive_duration} hours\n"
+              f"> **NSFW:** {emoji}\n"
+
+          en_US: f"> **Slowmode-Delay:** {slowmode_delay}\n"
+                f"> **Default-Auto-Archive-Duration:** {default_auto_archive_duration} hours\n"
+                f"> **NSFW:** {emoji}\n"
+
+      field_15:
+        name:
+          de: "__**Forum-Kanal-Informationen**__"
+          en_US: "__**Forum Channel Informations**__"
+        value:
+          de: f"> **Erstellt:**  {created_at}\n\n"
+          en_US: f"> **Created:**  {created_at}\n\n"
 
 
 

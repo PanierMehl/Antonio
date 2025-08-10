@@ -7,7 +7,7 @@ import random
 import cooldowns
 import nextcord
 import pytz
-import logging
+import time
 from cooldowns import CallableOnCooldown
 from dotenv import load_dotenv
 from nextcord import (ApplicationCheckFailure, ApplicationError,
@@ -21,7 +21,7 @@ from rich.console import Console
 from rich.table import Table
 #from discord.ext.ipc import Server, ClientPayload
 from modules.ticket_system.view import TicketMain_One_V2, TicketMain_Two_V2, TicketMain_Three_V2
-from modules.admin.view import join_giveawy_en, join_giveawy_de, TranscriptButton
+from modules.admin.view import join_giveawy_en, join_giveawy_de, TranscriptButton_de, TranscriptButton_en
 from mysql_asyncmy import A_DB
 
 
@@ -416,11 +416,12 @@ def main():
             giveaway_end_time = datetime.fromtimestamp(giveaway[0], tz=timezone.utc)
             message_id = giveaway[1]
             guild_id = giveaway[2]
-            giveaway_id = giveaway[4]
             channel_id = giveaway[3]
+            giveaway_id = giveaway[4]
             prize = giveaway[5]
             participants_data = giveaway[6]
-            finished = giveaway[7]
+            winners = giveaway[7]
+            finished = giveaway[8]
             
             time_since_end = current_time - giveaway_end_time
             if time_since_end >= timedelta(hours=12):
@@ -461,6 +462,7 @@ def main():
                                         participants = json.loads(participants_str)
                                     except json.JSONDecodeError:
                                         participants = []
+                    
                                             
                                             
                                 winners_list = winners_str.strip("[]").split(", ")
@@ -471,7 +473,7 @@ def main():
                                 l = await bot.db.query_server_table(guild_id)
                                 if l is not None:
                                     if l[5] == "English":
-                                        view = TranscriptButton(participants_data)
+                                        view = TranscriptButton_en(participants_data, winner_mentions, giveaway_id, prize, time.time(), winners)
                                         embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
                                         embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
                                         embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
@@ -482,24 +484,24 @@ def main():
                                         await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
                                         
                                     elif l[5] == "German":
-                                        view = TranscriptButton(participants_data)
+                                        view = TranscriptButton_de(participants_data, winner_mentions, giveaway_id, prize, time.time(), winners)
                                         embed = nextcord.Embed(title="🎉 Gewinnspiel beendet 🎉", description="Das Gewinnspiel ist beendet, eine weitere Teilnahme ist nicht möglich!", colour=config.red)
                                         embed.add_field(name="Gewinner", value=f"{winner_mentions}\n\uFEFF")
                                         embed.add_field(name="Preis", value=f"{prize}\n\uFEFF")
                                         embed.add_field(name="Teilnehmer", value=f"{len(participants)}\n\uFEFF")
                                         embed.set_footer(text=f"Gewinnspiel ID: {giveaway_id}")
-                                        #await message.edit(embed=embed, view=view)
-                                        await message.edit(embed=embed, view=None)
+                                        await message.edit(embed=embed, view=view)
                                         
                                         await channel.send(content=f"{winner_mentions} hat das Gewinnspiel `{giveaway_id}` gewonnen. Glückwunsch.")
                                         
                                 else:
+                                    view = TranscriptButton_en(participants_data, winner_mentions, giveaway_id, prize, time.time(), winners)
                                     embed = nextcord.Embed(title="🎉 Giveaway ended 🎉", description="The giveaway has ended, no further participation is possible!", colour=config.red)
                                     embed.add_field(name="Winners", value=f"{winner_mentions}\n\uFEFF")
                                     embed.add_field(name="Prize", value=f"{prize}\n\uFEFF")
                                     embed.add_field(name="Entries", value=f"{len(participants)}\n\uFEFF")
                                     embed.set_footer(text=f"Giveaway ID: {giveaway_id}")
-                                    await message.edit(embed=embed, view=None)
+                                    await message.edit(embed=embed, view=view)
                                     
                                     await channel.send(content=f"{winner_mentions} has won the giveaway `{giveaway_id}`. Congratulations.")
                                 

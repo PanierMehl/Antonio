@@ -3,11 +3,9 @@ from nextcord import Embed, Interaction, File, FFmpegPCMAudio, SlashOption, Loca
 from nextcord.ext import commands
 import tempfile
 import config
-from mysql_asyncmy import A_DB
 import asyncio
 from gtts import gTTS
-
-
+import yaml
         
 class Voice(commands.Cog, name="Voice Commands"):
     """Contains all voice commands"""
@@ -61,7 +59,11 @@ class Voice(commands.Cog, name="Voice Commands"):
             "Radio NRW": "https://stream.lokalradio.nrw/stream.mp3",
             "Deutschlandfunk": "https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3"
         }
-
+        
+    with open("trans.yaml", encoding="utf-8") as file:
+        trans = yaml.safe_load(file)
+        
+       
     async def radio_autocomplete(self, inter: Interaction, current: str):
         """Autocomplete für Radiosender"""
         return [
@@ -70,20 +72,19 @@ class Voice(commands.Cog, name="Voice Commands"):
                         if current.lower() in name.lower()
                     ][:25]
 
-    @nextcord.slash_command(name="voice", description="Voice-Befehle")
+    @nextcord.slash_command(name="voice",
+                            name_localizations=
+                            {Locale.de: "sprachkanal", Locale.en_US: "voice"})
     async def voice(self, inter: Interaction):
         pass
 
     @voice.subcommand(name="radio", description="Spielt ein Radio im Voice-Channel")
-    async def voice_radio(
-        self,
-        inter: Interaction,
-        sender: str = SlashOption(
-            name="sender",
-            description="Wähle den Radiosender",
-            autocomplete=True,
-        ),
-    ):
+    async def voice_radio(self, inter: Interaction,
+                          sender: str = SlashOption(name="sender",
+                                                    name_localizations={Locale.de: "sender", Locale.en_US: "station"},
+                                                    description="Please select a radio station",
+                                                    description_localizations={Locale.de:"Bitte wählen Sie einen Radiosender aus.", Locale.en_US: "Please select a radio station"},
+                                                    autocomplete=True)):
         if inter.user.voice is None:
             await inter.response.send_message("❌ Du bist in keinem Voice-Channel.", ephemeral=True)
             return

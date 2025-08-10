@@ -5,6 +5,8 @@ import config
 import pytz
 from datetime import datetime
 
+
+# Version 6 | Member Information View
 class mi_home(nc.ui.View):
     def __init__(self, ctx_or_interaction, input_member):
         super().__init__(timeout=30)
@@ -33,11 +35,13 @@ class mi_home(nc.ui.View):
         re.set_image(url=self.input_member.avatar.url)
         await inter.response.edit_message(embed=re, view=mi_backtohome(inter, self.input_member))
 
+
     @nc.ui.button(label="Member Avatar", style=nc.ButtonStyle.blurple, disabled=False)
     async def m_av(self, button: nc.ui.Button, inter: Interaction):
         re = Embed(title=f"Avatar from {self.input_member}", description=f"Here is the avatar of {config.dc_members} {self.input_member.display_name}", colour=config.blurple)
         re.set_image(url=self.input_member.avatar.url)
         await inter.response.edit_message(embed=re, view=mi_backtohome(inter, self.input_member))      
+        
         
     @nc.ui.button(label="Show all Roles", style=nc.ButtonStyle.blurple)
     async def show_all_roles(self, button: nc.ui.Button, inter: Interaction):
@@ -57,6 +61,7 @@ class mi_home(nc.ui.View):
         await inter.response.edit_message(embed=embed, view=mi_backtohome(inter, self.input_member))
     
 
+# Version 6 | Member Information BackHome View
 class mi_backtohome(nc.ui.View):
     def __init__(self, ctx_or_interaction, input_member):
         super().__init__(timeout=30)

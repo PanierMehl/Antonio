@@ -11,7 +11,7 @@ import perms_check
 import yaml
 
 
-
+# Version 6 | Yes or No View
 class Yes_OR_No(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=30)
@@ -46,6 +46,8 @@ class Yes_OR_No(nextcord.ui.View):
 
         await self.message.edit(view=self)
 
+
+# Version 6 | Ja oder Nein View
 class Ja_Oder_Nein(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=30)
@@ -68,7 +70,6 @@ class Ja_Oder_Nein(nextcord.ui.View):
         by.disabled = True
         await interaction.response.edit_message(view=self)
         self.stop()
-
         
     async def on_timeout(self):
         by = self.children[0]
@@ -79,6 +80,7 @@ class Ja_Oder_Nein(nextcord.ui.View):
         bn.style = ButtonStyle.grey
 
         await self.message.edit(view=self)
+
 
 class server_moderation(commands.Cog, name="Server Moderation"):
     """Contains all Server-Moderation commands"""
@@ -93,14 +95,18 @@ class server_moderation(commands.Cog, name="Server Moderation"):
     
 ########################################################################################################       
     
-    #Channel-Info_Command (V5.1)
-    @nextcord.slash_command(name="channel-info", description="Displays all information about a channel",
+    # Version 6 | Channel Info Command
+    @nextcord.slash_command(name="channel-info",
+                            description="Displays all information about a channel",
                             name_localizations={Locale.en_US: "channel-info", Locale.de: "kanalinformation"},
-                            description_localizations={Locale.en_US: "Displays all information about a channel", Locale.de: "Zeigt alle Informationen über einen Kanal an"})   
+                            description_localizations={Locale.en_US: "Displays all information about a channel",
+                                                       Locale.de: "Zeigt alle Informationen über einen Kanal an"})   
     @perms_check.has_min_supporter_perm_role() 
     async def channel_info(self, interaction: Interaction,
-                           channel: nextcord.abc.GuildChannel = SlashOption(name="channel", description=f"Please select a channel", name_localizations={Locale.en_US: "channel", Locale.de: "kanal"},
-                                                                            description_localizations={Locale.en_US: "Please select a channel!", Locale.de: "Bitte wähle einen Kanal!"},
+                           channel: nextcord.abc.GuildChannel = SlashOption(name="channel", description=f"Please select a channel",
+                                                                            name_localizations={Locale.en_US: "channel", Locale.de: "kanal"},
+                                                                            description_localizations={Locale.en_US: "Please select a channel!",
+                                                                                                       Locale.de: "Bitte wähle einen Kanal!"},
                                                                              channel_types=[ChannelType.text, 
                                                                                             ChannelType.news_thread, 
                                                                                             ChannelType.public_thread,
@@ -110,267 +116,165 @@ class server_moderation(commands.Cog, name="Server Moderation"):
                                                                                             ChannelType.stage_voice], required=False)):
         
         s_channel = channel or interaction.channel
-                
-        cs = Embed(title=f"Statistics for:   {config.dc_channel} **{s_channel.name}**",
-                            description=f"{'Category: {}'.format(s_channel.category.name) if s_channel.category else 'This channel is not in any category!'}",
-                            colour=config.random_colour)
 
-        cs_de = Embed(title=f"Statistiken für:   {config.dc_channel} **{s_channel.name}**",
-                            description=f"{'Kategorie: {}'.format(s_channel.category.name) if s_channel.category else 'Dieser Kanal befindet sich in keiner Kategorie!'}",
-                            colour=config.random_colour)
-                
+        e_cs = Embed(title=self.trans["commands"]["channel_info"]["e_cs"]["title"][interaction.locale].format(emoji = config.dc_channel,
+                                                                                                              channel_name = s_channel.name),
+                     description = (
+                         self.trans["commands"]["channel_info"]["e_cs"]["description"]["part_a"][interaction.locale].format(s_channel.category.name)
+                         if s_channel.category
+                         else self.trans["commands"]["channel_info"]["e_cs"]["description"]["part_b"][interaction.locale]),
+                     colour=config.random_colour)
+                     
         await interaction.response.defer(ephemeral=True)
     
         if isinstance(s_channel, nextcord.TextChannel):
 
-            information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
-            information_icon_url = "attachment://information-icon.png"
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_1"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_1"]["value"][interaction.locale].format(
+                             channel_name = s_channel.name,
+                             channel_jump_url = s_channel.jump_url,
+                             channel_id = s_channel.id,
+                             channel_category = f'<#{s_channel.category_id}>' if {s_channel.category_id} else '----`',
+                             channel_category_id = s_channel.category_id if s_channel.category else '-----',
+                             topic = s_channel.topic if s_channel.topic else '-----',
+                             position = s_channel.position +1),
+                         inline=False)
 
-            cs.add_field(name="__**General**__", value=
-                        f"> **Channel-Name:** {s_channel.name}\n"
-                        f"> **Channel-Mention:** {s_channel.jump_url}\n"
-                        f"> **Channel-ID:** `{s_channel.id}`\n\n"
-                        f"> **Category:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n"                          
-                        f"> **Category-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Topic:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)
-            cs.add_field(name="__**Channel Settings**__", value=
-                        f"> **Slowmode-Delay:** {s_channel.slowmode_delay} secounds\n\n"
-                        f"> **Default-Auto-Archive-Duration:** {s_channel.default_auto_archive_duration/60} hours\n", inline=True)
-            cs.add_field(name="__**Channel Informations**__", value=
-                        f"> **Created:**  {f'<t:{int(s_channel.created_at.timestamp())}:F>'}\n\n", inline=True)
-            cs.set_thumbnail(url=information_icon_url)
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_2"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_2"]["value"][interaction.locale].format(
+                             delay = s_channel.slowmode_delay,
+                             auto_archive_duration = s_channel.default_auto_archive_duration/60),
+                        inline=True)
 
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_3"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_3"]["value"][interaction.locale].format(
+                             created_at = {f'<t:{int(s_channel.created_at.timestamp())}:F>'}),
+                         inline=True)
 
-            cs_de.add_field(name="__**Allgemein**__", value=
-                        f"> **Kanal-Name:** {s_channel.name}\n"
-                        f"> **Kanal-Erwähnung:** {s_channel.jump_url}\n"
-                        f"> **Kanal-ID:** `{s_channel.id}`\n\n"
-                        f"> **Kategorie:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n"                          
-                        f"> **Kategorie-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Thema:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)
-            cs_de.add_field(name="__**Kanaleinstellungen**__", value=
-                        f"> **Slowmode:** {s_channel.slowmode_delay} Sekunden\n\n"
-                        f"> **Standard-Auto-Archivierungsdauer:** {s_channel.default_auto_archive_duration/60} Stunden\n", inline=True)
-            cs_de.add_field(name="__**Kanalinformationen**__", value=
-                        f"> **Erstellt:**  {f'<t:{int(s_channel.created_at.timestamp())}:F>'}\n\n", inline=True)
-            cs_de.set_thumbnail(url=information_icon_url)
-            
-            if interaction.locale == "de":
-                await interaction.edit_original_message(embed=cs_de, file=information_icon_png)
-                
-            elif interaction.locale == "en_US":
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            else:
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
+            await interaction.edit_original_message(embed=e_cs)
 
 
         if isinstance(s_channel, nextcord.StageChannel):
 
-            information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
-            information_icon_url = "attachment://information-icon.png"
-            
-            cs.add_field(name="__**General**__", value=
-                        f"> **Stage-Name:** {s_channel.name}\n"
-                        f"> **Stage-Mention:** {s_channel.jump_url}\n"
-                        f"> **Stage-ID:** `{s_channel.id}`\n\n"
-                        f"> **Topic:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Category:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n" 
-                        f"> **Category-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)  
-            cs.add_field(name="__**Stage Voice Settings**__", value=
-                        f"> **Bitrate:** {s_channel.bitrate}\n\n"
-                        f"> **User-Limit:** {s_channel.user_limit}\n\n"
-                        f"> **Region:** {s_channel.rtc_region if s_channel.rtc_region else '`-----`'}\n\n"
-                        f"> **Video-Quality-Mode:** {s_channel.video_quality_mode}\n", inline=True)       
-            cs.add_field(name="__**Thread Informations**__", value=
-                        f"> **Created:** <t:{int(s_channel.created_at.timestamp())}:F>\n\n", inline=True)
-            cs.set_thumbnail(url=information_icon_url)
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_4"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_4"]["value"][interaction.locale].format(
+                             channel_name = s_channel.name,
+                             channel_jump_url = s_channel.jump_url,
+                             channel_id = s_channel.id,
+                             topic = s_channel.topic if s_channel.topic else '-----',
+                             channel_category =  {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'},
+                             channel_category_id = s_channel.category_id if s_channel.category else '-----',
+                             position = s_channel.position +1),
+                         inline = False)
 
 
-            cs_de.add_field(name="__**Allgemein**__", value=
-                        f"> **Stage-Name:** {s_channel.name}\n"
-                        f"> **Stage-Erwähnung:** {s_channel.jump_url}\n"
-                        f"> **Stage-ID:** `{s_channel.id}`\n\n"
-                        f"> **Thema:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Kategorie:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n" 
-                        f"> **Kategorie-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)  
-            cs_de.add_field(name="__**Stage-Kanal-Einstellungen**__", value=
-                        f"> **Bitrate:** {s_channel.bitrate}\n\n"
-                        f"> **Benutzerlimit:** {s_channel.user_limit}\n\n"
-                        f"> **Region:** {s_channel.rtc_region if s_channel.rtc_region else '`-----`'}\n\n"
-                        f"> **Video-Qualität-Modus:** {s_channel.video_quality_mode}\n", inline=True)       
-            cs_de.add_field(name="__**Stage-Kanal-Informationen**__", value=
-                        f"> **Erstellt:** <t:{int(s_channel.created_at.timestamp())}:F>\n\n", inline=True)
-            cs_de.set_thumbnail(url=information_icon_url)
-                                   
-            if interaction.locale == "de":
-                await interaction.edit_original_message(embed=cs_de, file=information_icon_png)
-                
-            elif interaction.locale == "en_US":
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            else:
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_5"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_5"]["value"][interaction.locale].format(
+                             bitrate = s_channel.bitrate,
+                             user_limit = s_channel.user_limit,
+                             rtc_region = s_channel.rtc_region if s_channel.rtc_region else '-----',
+                             video_quality_mode = s_channel.video_quality_mode),
+                         inline = True)
+
+    
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_6"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_6"]["value"][interaction.locale].format(
+                             created_at = {int(s_channel.created_at.timestamp())}),
+                         inline = True)
+
+            await interaction.edit_original_message(embed=e_cs)
         
 
+
         if isinstance(s_channel, nextcord.VoiceChannel):
+                       
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_7"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_7"]["value"][interaction.locale].format(
+                             name = s_channel.name,
+                             jump_url = s_channel.jump_url,
+                             channel_id = s_channel.id,
+                             category = {f'<#{s_channel.category_id}>' if s_channel.category_id else '-----'},
+                             category_id = s_channel.category_id if s_channel.category else '-----',
+                             position = s_channel.position +1),
+                         inline = False)
+    
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_8"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_8"]["value"][interaction.locale].format(
+                             bitrate = s_channel.bitrate,
+                             user_limit = s_channel.user_limit,
+                             rtc_region = s_channel.rtc_region if s_channel.rtc_region else '-----',
+                             video_quality_mode = s_channel.video_quality_mode),
+                         inline=True)    
+            
+               
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_9"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_9"]["value"][interaction.locale].format(
+                             created_at = {int(s_channel.created_at.timestamp())}),
+                         inline=True)
 
-            information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
-            information_icon_url = "attachment://information-icon.png"
-                        
-            cs.add_field(name="__**General**__", value=
-                        f"> **Voice-Name:** {s_channel.name}\n"
-                        f"> **Voice-Mention:** {s_channel.jump_url}\n"
-                        f"> **Voice-ID:** `{s_channel.id}`\n\n"
-                        f"> **Category:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n" 
-                        f"> **Category-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)
-            cs.add_field(name="__**Voice Settings**__", value=
-                        f"> **Bitrate:** {s_channel.bitrate}\n\n"
-                        f"> **User-Limit:** {s_channel.user_limit}\n\n"
-                        f"> **Region:** {s_channel.rtc_region if s_channel.rtc_region else '`-----`'}\n\n"
-                        f"> **Video-Quality-Mode:** {s_channel.video_quality_mode}\n", inline=True)       
-            cs.add_field(name="__**Voice Informations**__", value=
-                        f"> **Created:** <t:{int(s_channel.created_at.timestamp())}:F>\n\n", inline=True)
-            cs.set_thumbnail(url=information_icon_url)
+            await interaction.edit_original_message(embed=e_cs)
+                
 
-            cs_de.add_field(name="__**Allgemein**__", value=
-                        f"> **Voice-Name:** {s_channel.name}\n"
-                        f"> **Voice-Mention:** {s_channel.jump_url}\n"
-                        f"> **Voice-ID:** `{s_channel.id}`\n\n"
-                        f"> **Kategorie:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n" 
-                        f"> **Kategorie-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position+1}`\n\uFEFF", inline=False)
-            cs_de.add_field(name="__**Voice-EInstellungen**__", value=
-                        f"> **Bitrate:** {s_channel.bitrate}\n\n"
-                        f"> **Benutzerlimit:** {s_channel.user_limit}\n\n"
-                        f"> **Region:** {s_channel.rtc_region if s_channel.rtc_region else '`-----`'}\n\n"
-                        f"> **Video-Quality-Modus:** {s_channel.video_quality_mode}\n", inline=True)       
-            cs_de.add_field(name="__**Voice-Informationen**__", value=
-                        f"> **Erstellt:** <t:{int(s_channel.created_at.timestamp())}:F>\n\n", inline=True)
-            cs_de.set_thumbnail(url=information_icon_url)
-                                   
-            if interaction.locale == "de":
-                await interaction.edit_original_message(embed=cs_de, file=information_icon_png)
-                
-            elif interaction.locale == "en_US":
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            else:
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            return
             
             
         if isinstance(s_channel, nextcord.Thread):
 
-            information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
-            information_icon_url = "attachment://information-icon.png"
-             
-            cs.add_field(name="__**General**__", value=
-                        f"> **Thread-Name:** {s_channel.name}\n"
-                        f"> **Thread-Mention:** {s_channel.jump_url}\n"
-                        f"> **Thread-ID:** `{s_channel.id}`\n\n"
-                        f"> **Original-Channel:** <#{s_channel.parent_id}>\n"
-                        f"> **Original-ID:** `{s_channel.parent_id}`\n\n"
-                        f"> **Thread-Owner:** <@{s_channel.owner_id}>\n"
-                        f"> **Thread-Owner-ID:** `{s_channel.owner_id}`\n\uFEFF", inline=False)
-            cs.add_field(name="__**Thread Settings**__", value=
-                        f"> **Slowmode-Delay:** {s_channel.slowmode_delay}\n\n"
-                        f"> **Auto-Archive-Duration:** {s_channel.auto_archive_duration/60} hours\n\n"
-                        f"> **Private:** {config.a_tic if s_channel.is_private() else config.a_cross}\n\n"
-                        f"> **NSFW:** {config.a_tic if s_channel.is_nsfw() else config.a_cross}", inline=True)
-            cs.add_field(name="__**Thread Informations**__", value=
-                        f"> **Created:** <t:{int(s_channel.create_timestamp.timestamp())}:F>\n\n"
-                        f"> **Archived:** {config.a_tic if s_channel.archived else config.a_cross}\n"
-                        f"> **Last Archive:** {f'<t:{int(s_channel.archive_timestamp.timestamp())}:F>' if s_channel.archive_timestamp else 'Not archived'}\n\n"
-                        f"> **Locked:** {config.a_tic if s_channel.locked else config.a_cross}\n\n"
-                        f"> **Invitable:** {config.a_tic if s_channel.invitable else config.a_cross}\n\n", inline=True)
-            cs.set_thumbnail(url=information_icon_url)
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_10"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_10"]["value"][interaction.locale].format(
+                             name = s_channel.name,
+                             jumpr_url = s_channel.jump_url,
+                             channel_id = s_channel.id,
+                             parent_id = s_channel.parent_id,
+                             owner_id = s_channel.owner_id),
+                         inline=False)
             
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_11"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_11"]["value"][interaction.locale].format(
+                             slowmode_delay = s_channel.slowmode_delay,
+                             auto_archive_duration = s_channel.auto_archive_duration/60,
+                             emoji_a = config.a_tic if s_channel.is_private() else config.a_cross,
+                             emoji_b = config.a_tic if s_channel.is_nsfw() else config.a_cross),
+                         inline=True)
+                         
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_12"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_12"]["value"][interaction.locale].format(
+                             create_timestamp = int(s_channel.create_timestamp.timestamp()),
+                             emoji_a = config.a_tic if s_channel.archived else config.a_cross,
+                             archive_timestamp = {f'<t:{int(s_channel.archive_timestamp.timestamp())}:F>' if s_channel.archive_timestamp else 'Not archived'},
+                             emoji_b = config.a_tic if s_channel.locked else config.a_cross,
+                             emoji_c = config.a_tic if s_channel.invitable else config.a_cross),
+                         inline=True)
             
-            cs_de.add_field(name="__**Allgemein**__", value=
-                        f"> **Thread-Name:** {s_channel.name}\n"
-                        f"> **Thread-Erwähnung:** {s_channel.jump_url}\n"
-                        f"> **Thread-ID:** `{s_channel.id}`\n\n"
-                        f"> **Originaler Kanal:** <#{s_channel.parent_id}>\n"
-                        f"> **Original-ID:** `{s_channel.parent_id}`\n\n"
-                        f"> **Thread-Besitzer:** <@{s_channel.owner_id}>\n"
-                        f"> **Thread-Besitzer-ID:** `{s_channel.owner_id}`\n\uFEFF", inline=False)
-            cs_de.add_field(name="__**Thread-Einstellungen**__", value=
-                        f"> **Slowmode:** {s_channel.slowmode_delay}\n\n"
-                        f"> **Auto-Archivierungsdauer:** {s_channel.auto_archive_duration/60} hours\n\n"
-                        f"> **Privat:** {config.a_tic if s_channel.is_private() else config.a_cross}\n\n"
-                        f"> **NSFW:** {config.a_tic if s_channel.is_nsfw() else config.a_cross}", inline=True)
-            cs_de.add_field(name="__**Thread-Informationen**__", value=
-                        f"> **Erstellt:** <t:{int(s_channel.create_timestamp.timestamp())}:F>\n\n"
-                        f"> **Archived:** {config.a_tic if s_channel.archived else config.a_cross}\n"
-                        f"> **letzte Archivierung:** {f'<t:{int(s_channel.archive_timestamp.timestamp())}:F>' if s_channel.archive_timestamp else 'Not archived'}\n\n"
-                        f"> **Geschlossen:** {config.a_tic if s_channel.locked else config.a_cross}\n\n"
-                        f"> **Einladbar:** {config.a_tic if s_channel.invitable else config.a_cross}\n\n", inline=True)
-            cs_de.set_thumbnail(url=information_icon_url)
-
-            if interaction.locale == "de":
-                await interaction.edit_original_message(embed=cs_de, file=information_icon_png)
-                
-            elif interaction.locale == "en_US":
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            else:
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
+            await interaction.edit_original_message(embed=e_cs)
 
 
 
         if isinstance(s_channel, nextcord.ForumChannel):
 
-            information_icon_png = File("pictures/information-icon.png", filename="information-icon.png")
-            information_icon_url = "attachment://information-icon.png"
-                        
-            cs.add_field(name="__**General**__", value=
-                        f"> **Forum-Name:** {s_channel.name}\n"
-                        f"> **Forum-Mention:** {s_channel.jump_url}\n"
-                        f"> **Forum-ID:** `{s_channel.id}`\n\n"
-                        f"> **Topic:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Category:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n"
-                        f"> **Category-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position}`\n\uFEFF", inline=False)
-            cs.add_field(name="__**Forum Channel Settings**__", value=
-                        f"> **Slowmode-Delay:** {s_channel.slowmode_delay}\n"
-                        f"> **Default-Auto-Archive-Duration:** {s_channel.default_auto_archive_duration/60} hours\n"
-                        f"> **NSFW:** {config.a_tic if s_channel.is_nsfw() else config.a_cross}\n", inline=True)
-            cs.add_field(name="__**Forum Channel Informations**__", value=
-                        f"> **Created:**  {f'<t:{int(s_channel.created_at.timestamp())}:F>'}\n\n", inline=True)
-            cs.set_thumbnail(url=information_icon_url)
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_13"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_13"]["value"][interaction.locale].format(
+                             name = s_channel.name,
+                             jump_url = s_channel.jump_url,
+                             channel_id = s_channel.id,
+                             topic = s_channel.topic if s_channel.topic else '-----',
+                             category = {f'<#{s_channel.category_id}>' if s_channel.category_id else '-----'},
+                             category_id = s_channel.category_id if s_channel.category else '`-----`',
+                             position = s_channel.position),
+                         inline=False)
+            
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_14"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_14"]["value"][interaction.locale].format(
+                             slowmode_delay = s_channel.slowmode_delay,
+                             default_auto_archive_duration = s_channel.default_auto_archive_duration/60,
+                             emoji = config.a_tic if s_channel.is_nsfw() else config.a_cross),
+                         inline=True)
+            
+            e_cs.add_field(name=self.trans["commands"]["channel_info"]["e_cs"]["field_14"]["name"][interaction.locale],
+                         value=self.trans["commands"]["channel_info"]["e_cs"]["field_14"]["value"][interaction.locale].format(
+                             created_at = {f'<t:{int(s_channel.created_at.timestamp())}:F>'}),
+                         inline=True)
 
-
-            cs_de.add_field(name="__**Allgemein**__", value=
-                        f"> **Forum-Name:** {s_channel.name}\n"
-                        f"> **Forum-Erwähnung:** {s_channel.jump_url}\n"
-                        f"> **Forum-ID:** `{s_channel.id}`\n\n"
-                        f"> **Thema:** {s_channel.topic if s_channel.topic else '`-----`'}\n\n"
-                        f"> **Kategorie:** {f'<#{s_channel.category_id}>' if s_channel.category_id else '`-----`'}\n"
-                        f"> **Kategorie-ID:** `{s_channel.category_id if s_channel.category else '-----'}`\n\n"
-                        f"> **Position:** `{s_channel.position}`\n\uFEFF", inline=False)
-            cs_de.add_field(name="__**Forum-Kanal-Einstellungen**__", value=
-                        f"> **Slowmode:** {s_channel.slowmode_delay}\n"
-                        f"> **Standard-Auto-Archivierungsdauer:** {s_channel.default_auto_archive_duration/60} hours\n"
-                        f"> **NSFW:** {config.a_tic if s_channel.is_nsfw() else config.a_cross}\n", inline=True)
-            cs_de.add_field(name="__**Forum-Kanal-Informationen**__", value=
-                        f"> **Erstellt:**  {f'<t:{int(s_channel.created_at.timestamp())}:F>'}\n\n", inline=True)
-            cs_de.set_thumbnail(url=information_icon_url)
-                                   
-            if interaction.locale == "de":
-                await interaction.edit_original_message(embed=cs_de, file=information_icon_png)
-                
-            elif interaction.locale == "en_US":
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
-                
-            else:
-                await interaction.edit_original_message(embed=cs, file=information_icon_png)
+            await interaction.edit_original_message(embed=e_cs)
 
 
         return    
