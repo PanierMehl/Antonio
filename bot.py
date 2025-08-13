@@ -321,7 +321,7 @@ def main():
             new_lvl = sum(1 for threshold in level_thresholds if new_xp_count >= threshold) + 1
             
             if old_level < new_lvl:
-                await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}")
+                await message.channel.send(content=f"Level UP {message.author.mention}. You are now Level {new_lvl}", delete_after=10)
             await bot.db.level_user_update(rounded_xp_count, new_lvl, formatted_datetime, user, guild)
             return
                         
